@@ -38,6 +38,8 @@ def fetch_data_with_CVE_number(cve_number: str):
         return False
     result = defaultdict(None, nvd_data)
     result["vendor"] = open_cve_data["vendor"]
+    result["title"] = open_cve_data["title"]
+
     # NOTE: More info from OpenCVE can be added here.
 
     # Save data to `./data/{cve_number}/{cve_number}.json`. If the directory does not exist, create it.
@@ -164,15 +166,17 @@ def fetch_data_with_CVE_number_in_OpenCVE(cve_number: str):
         logger.exception(f"Failed to fetch data from OpenCVE for {cve_number}")
         return None
 
-    response = defaultdict(None, response.json())
+    response_text = defaultdict(None, response.json())
     info = defaultdict(None)
-    info["id"] = response["id"]
-    info["vendor"] = response["vendors"]
-    info['descrtiption'] = response["info"]
-    info["cwe"] = response["cwes"]
+    info["id"] = response_text["cve_id"]
+    info["vendor"] = response_text["vendors"]
+    info["title"] = response_text["title"]
+    info['descrtiption'] = response_text["description"]
+    info["cwe"] = response_text["weaknesses"]
 
     # Dump request headers and check rate limit
-    logger.debug(response.headers)
+    # NOTE: it seems that there is no rate limit in OpenCVE API?
+    # logger.debug(f"Request headers: {response.headers}")
     if "X-RateLimit-Remaining" in response.headers and "X-RateLimit-Limit" in response.headers and "Retry-After" in response.headers:
         remaining = response.headers["X-RateLimit-Remaining"]
         limit = response.headers["X-RateLimit-Limit"]

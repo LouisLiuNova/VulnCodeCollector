@@ -8,65 +8,70 @@ from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 from security import save_env_var, load_env_var
 import os
-def fetch_data_with_CVE_number(cve_number:str):
+
+
+def fetch_data_with_CVE_number(cve_number: str):
     """
     Fetch the data from the NVD API and OpenCVE with the given ONE CVE number. If vaild, save the data to `./data/[cve-number]/` and continue to fetch source code from the GitHub API.
-    
+
     Args:
     cve_number: str: The CVE number to fetch. Must be a valid CVE string like "CVE-2021-1234" or "cve-2021-1234".
-    
+
     Returns:
     status: bool: True if the data is fetched successfully, False otherwise.
     """
-    
+
     # Receive and check input parameter
     cve_number = cve_number.upper()
     logger.info(f"Fetching data for {cve_number}")
     if not validate_cve(cve_number):
         logger.warning(f"{cve_number} is not a valid CVE number, skipping")
         return False
-    
+
     nvd_data = fetch_data_with_CVE_number_in_NVD(cve_number)
     open_cve_data = fetch_data_with_CVE_number_in_OpenCVE(cve_number)
-    
+
     # Merge data
     if nvd_data is None or open_cve_data is None:
         logger.warning(f"Failed to fetch data for {cve_number}")
         return False
-    result=defaultdict(None,nvd_data)
-    result["vendor"]=open_cve_data["vendor"]
+    result = defaultdict(None, nvd_data)
+    result["vendor"] = open_cve_data["vendor"]
     # NOTE: More info from OpenCVE can be added here.
-    
+
     # Save data to `./data/{cve_number}/{cve_number}.json`. If the directory does not exist, create it.
-    data_dir=f"./data/{cve_number}"
+    data_dir = f"./data/{cve_number}"
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
-    with open(f"{data_dir}/{cve_number}.json","w") as f:
-        json.dump(result,f)
-    logger.info(f"Successfully saved data for {cve_number} to {data_dir}/{cve_number}.json")
-    
+    with open(f"{data_dir}/{cve_number}.json", "w") as f:
+        json.dump(result, f)
+    logger.info(f"Successfully saved data for {
+                cve_number} to {data_dir}/{cve_number}.json")
+
     # Retrive GitHub commit URLs and fetch commit message via GitHub API
-    githubURLs=list()
+    githubURLs = list()
     if "GitHub" in result["references"]:
         for commit_url in result["references"]["GitHub"]:
             if commit_url in result["references"]["Patch"]:
-                logger.info(f"{cve_number} has a GitHub patch commit URL: {commit_url}")
+                logger.info(
+                    f"{cve_number} has a GitHub patch commit URL: {commit_url}")
                 githubURLs.append(commit_url)
 
     # Fetch source code from GitHub API
     # TODO: The GitHub API is not implemented yet.
 
-def fetch_data_with_CVE_number_in_NVD(cve_number:str)->dict:
+
+def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
     """
     Fetch data from NVD API with the given ONE CVE number. Data includes the description, references, and weakness. For the doc of the endpoint, refer https://nvd.nist.gov/developers/vulnerabilities 
-    
+
     Args:
     cve_number: str: The validated CVE number to fetch. Must be a valid CVE string like "CVE-2021-1234" or "cve-2021-1234".
-    
+
     Return:
     dict: The fetched and filtered data from NVD API.
     """
-    
+
     # Fetch data from NVD API
     BASE_ENDPOINT = "https://services.nvd.nist.gov/rest/json/cves/2.0"
     try:
@@ -74,124 +79,129 @@ def fetch_data_with_CVE_number_in_NVD(cve_number:str)->dict:
         response.raise_for_status()
     except:
         return None
-    
+
     logger.debug(response.json())
-    response=response.json()
-    if (vuln_info:=response["vulnerabilities"])==[] or response["resultsPerPage"]==0:
+    response = response.json()
+    if (vuln_info := response["vulnerabilities"]) == [] or response["resultsPerPage"] == 0:
         logger.warning(f"No data found for {cve_number}")
         return None
-    
+
     # Dump data and save to file
     # NOTE: Only fields "cve", "cveTags", "references" and "descriptions" are required, other fields are optional and may unexist.
     # NOTE: Refer https://nvd.nist.gov/developers/vulnerabilities for full documentation.
-    vuln_info=defaultdict(None,vuln_info[0]["cve"])
-    info=defaultdict(None)
-    info["cve_number"]=vuln_info["id"]
-    info["publish_date"]=vuln_info["published"]
-    info["description"]=next((desc['value'] for desc in vuln_info['descriptions'] if desc['lang'] == 'en'), "No desc yet")
-    info["status"]=vuln_info["vulnStatus"]
-    
+    vuln_info = defaultdict(None, vuln_info[0]["cve"])
+    info = defaultdict(None)
+    info["cve_number"] = vuln_info["id"]
+    info["publish_date"] = vuln_info["published"]
+    info["description"] = next(
+        (desc['value'] for desc in vuln_info['descriptions'] if desc['lang'] == 'en'), "No desc yet")
+    info["status"] = vuln_info["vulnStatus"]
+
     # Dump weakness data
-    weakness=list()
+    weakness = list()
     if "weakness" in vuln_info:
         for cwe in vuln_info["weakness"]:
             if "description" in cwe:
                 for lang in cwe["description"]:
-                    if lang["lang"]=="en":
+                    if lang["lang"] == "en":
                         weakness.append(lang["value"])
                         break
-    info["weakness"]=weakness
+    info["weakness"] = weakness
 
     # Dump references data
     # NOTE: the field "references" is a dict, the key is the tag and the value is a list of URLs in this tag. Some URLs may belong to multiple tags so they may appear in multiple tags.
-    references=defaultdict(list)
+    references = defaultdict(list)
     if "references" in vuln_info:
         for ref_url in vuln_info["references"]:
-            tags=ref_url["tags"]
+            tags = ref_url["tags"]
             # NOTE: for those URLs without tags, we will ignore them except it is a GitHub URL.
             # TODO: if the URL does not belong to the vendor fetched from the openCVE, we will ignore it. For why we need to do this, refer to CVE-2015-3885 in NVD.
             for tag in tags:
                 references[tag].append(ref_url["url"])
             # To validate if the URL is a GitHub commit. If so, we will relove it later and fetch the source code from the GitHub API.
             if validate_a_url_belongs_to_github(ref_url["url"]):
-                logger.info(f"Found a GitHub commit URL for {cve_number}: {ref_url['url']}")
+                logger.info(f"Found a GitHub commit URL for {
+                            cve_number}: {ref_url['url']}")
                 references["GitHub"].append(ref_url["url"])
-    info["references"]=references
-    
-    return info
-    
-            
-    
+    info["references"] = references
 
-def fetch_data_with_CVE_number_in_OpenCVE(cve_number:str):
+    return info
+
+
+def fetch_data_with_CVE_number_in_OpenCVE(cve_number: str):
     """
     Fetch data from OpenCVE with the given ONE CvE number. Data includes vendor, product, CWEs. For the doc of the endpoint, refer https://docs.opencve.io/api/cve/
-    
+
     Args:
     cve_number: str: The validated CvE number to fetch. Must be a valid CvE string like "CVE-2021-1234" or "cve-2021-1234".
-    
+
     Returns:
     dict: The fetched and filtered data from OpenCVE.
     """
-    BASE_ENDPOINT="https://www.opencve.io/api/cve/"
-    
+    BASE_ENDPOINT = "https://www.opencve.io/api/cve/"
+
     # Load credentials
-    username=load_env_var("OPENCVE_USERNAME")
-    password=load_env_var("OPENCVE_PASSWORD")
+    username = load_env_var("OPENCVE_USERNAME")
+    password = load_env_var("OPENCVE_PASSWORD")
     if username is None or password is None:
         # OpenCVE only supports basic authentication
-        logger.error("Failed to load OpenCVE credentials. Register it before fetching data from OpenCVE.")
+        logger.error(
+            "Failed to load OpenCVE credentials. Register it before fetching data from OpenCVE.")
         return None
-    
+
     # Send request
     try:
-        logger.info(f"Fetching data from OpenCVE for {cve_number} with username {username} and password {password}")
-        
-        response=requests.get(f"{BASE_ENDPOINT}{cve_number}",auth=HTTPBasicAuth(username,password))
+        logger.info(f"Fetching data from OpenCVE for {cve_number} with username {
+                    username} and password {password}")
+
+        response = requests.get(
+            f"{BASE_ENDPOINT}{cve_number}", auth=HTTPBasicAuth(username, password))
         response.raise_for_status()
     except:
         logger.exception(f"Failed to fetch data from OpenCVE for {cve_number}")
         return None
 
-    response=defaultdict(None,response.json())
-    info=defaultdict(None)
-    info["id"]=response["id"]
-    info["vendor"]=response["vendor"]
-    info['descrtiption']=response["info"]
-    info["cwe"]=response["cwes"]
-    
+    response = defaultdict(None, response.json())
+    info = defaultdict(None)
+    info["id"] = response["id"]
+    info["vendor"] = response["vendor"]
+    info['descrtiption'] = response["info"]
+    info["cwe"] = response["cwes"]
+
     # Dump request headers and check rate limit
     logger.debug(response.headers)
     if "X-RateLimit-Remaining" in response.headers and "X-RateLimit-Limit" in response.headers and "Retry-After" in response.headers:
-        remaining=response.headers["X-RateLimit-Remaining"]
-        limit=response.headers["X-RateLimit-Limit"]
-        if remaining<=limit//10:
-            logger.warning(f"Rate limit is running low. Remaining: {remaining}/{limit}. Retry after {response.headers['Retry-After']} seconds.")
+        remaining = response.headers["X-RateLimit-Remaining"]
+        limit = response.headers["X-RateLimit-Limit"]
+        if remaining <= limit//10:
+            logger.warning(f"Rate limit is running low. Remaining: {
+                           remaining}/{limit}. Retry after {response.headers['Retry-After']} seconds.")
         else:
-            logger.info(f"Rate limit remaining: {response.headers['X-RateLimit-Remaining']}")
-            
-    return info 
-    
-    
+            logger.info(f"Rate limit remaining: {
+                        response.headers['X-RateLimit-Remaining']}")
 
-def validate_a_url_belongs_to_github(url:str):
+    return info
+
+
+def validate_a_url_belongs_to_github(url: str):
     """
     Validate a URL belongs to GitHub commit.
-    
+
     Args:
     url: str: The URL to validate.
-    
+
     Returns:
     bool: True if the URL belongs to GitHub, False otherwise.
     """
     # GitHub commit URL 的正则表达式
     pattern = r'^https://github\.com/[\w\-]+/[\w\-]+/commit/[0-9a-f]{40}$'
     return re.match(pattern, url) is not None
-    
+
+
 def validate_cve(cve_id: str) -> bool:
     # 定义CVE标号的正则表达式
     pattern = r'^CVE-\d{4}-\d{4,}$'
-    
+
     # 使用 re.match() 校验字符串
     if re.match(pattern, cve_id):
         return True

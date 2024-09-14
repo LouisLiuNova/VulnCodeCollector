@@ -39,7 +39,7 @@ conda activate vulnsrc
 
 GitHub的REST API仅支持通过personal access token进行认证。（[参考](https://docs.github.com/zh/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28#authenticating-with-username-and-password)）
 
-参考[Official doc](https://docs.github.com/zh/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28#使用-personal-access-token)可以获取更多信息。
+参考[Official doc](https://docs.github.com/zh/rest/quickstart?apiVersion=2022-11-28)可以获取更多信息。
 
 [获取与使用personal access token](https://docs.github.com/zh/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#创建-personal-access-token-classic)
 

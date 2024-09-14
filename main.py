@@ -43,7 +43,7 @@ class Register(object):
     def github(self, token: str):
         """ To save credentials for Github."""
         logger.info(f"Registering a new user for Github")
-        save_env_var("GITHUB_TOKEN", token) 
+        save_env_var("GITHUB_TOKEN", token)
         logger.info(f"Successfully registered a new user for Github")
         return
 

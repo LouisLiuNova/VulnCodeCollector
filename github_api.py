@@ -10,7 +10,7 @@ from security import load_env_var
 
 def fetch_patch_source_code(cve_number: str, commit_url: str):
     """
-    Fetch the source code of a patch from the GitHub API and save it to .
+    Fetch the source code of a patch from the GitHub API (https://docs.github.com/zh/rest/commits/commits?apiVersion=2022-11-28#get-a-commit) and save it to .
 
     Args:
     cve_number: str: The CVE number of the patch.
@@ -26,3 +26,5 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
         logger.error(
             "Failed to load GitHub token. Please register a token first.")
         return
+
+    # TODO: Resolve commit URL

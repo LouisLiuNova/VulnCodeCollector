@@ -8,6 +8,7 @@ from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 from security import save_env_var, load_env_var
 import os
+import base64
 
 
 def fetch_data_with_CVE_number(cve_number: str):
@@ -63,7 +64,7 @@ def fetch_data_with_CVE_number(cve_number: str):
 
 def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
     """
-    Fetch data from NVD API with the given ONE CVE number. Data includes the description, references, and weakness. For the doc of the endpoint, refer https://nvd.nist.gov/developers/vulnerabilities 
+    Fetch data from NVD API with the given ONE CVE number. Data includes the description, references, and weakness. For the doc of the endpoint, refer https://nvd.nist.gov/developers/vulnerabilities
 
     Args:
     cve_number: str: The validated CVE number to fetch. Must be a valid CVE string like "CVE-2021-1234" or "cve-2021-1234".
@@ -113,7 +114,10 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
     references = defaultdict(list)
     if "references" in vuln_info:
         for ref_url in vuln_info["references"]:
-            tags = ref_url["tags"]
+            if "tags" in ref_url:
+                tags = ref_url["tags"]
+            else:
+                tags = list()
             # NOTE: for those URLs without tags, we will ignore them except it is a GitHub URL.
             # TODO: if the URL does not belong to the vendor fetched from the openCVE, we will ignore it. For why we need to do this, refer to CVE-2015-3885 in NVD.
             for tag in tags:
@@ -138,7 +142,7 @@ def fetch_data_with_CVE_number_in_OpenCVE(cve_number: str):
     Returns:
     dict: The fetched and filtered data from OpenCVE.
     """
-    BASE_ENDPOINT = "https://www.opencve.io/api/cve/"
+    BASE_ENDPOINT = "https://app.opencve.io/api/cve/"
 
     # Load credentials
     username = load_env_var("OPENCVE_USERNAME")
@@ -149,13 +153,12 @@ def fetch_data_with_CVE_number_in_OpenCVE(cve_number: str):
             "Failed to load OpenCVE credentials. Register it before fetching data from OpenCVE.")
         return None
 
-    # Send request
+    # Prepare and Send request
     try:
-        logger.info(f"Fetching data from OpenCVE for {cve_number} with username {
-                    username} and password {password}")
-
         response = requests.get(
             f"{BASE_ENDPOINT}{cve_number}", auth=HTTPBasicAuth(username, password))
+        logger.debug(f"Response code:{response.status_code}")
+        logger.debug(f"Response body:{response.text}")
         response.raise_for_status()
     except:
         logger.exception(f"Failed to fetch data from OpenCVE for {cve_number}")
@@ -164,7 +167,7 @@ def fetch_data_with_CVE_number_in_OpenCVE(cve_number: str):
     response = defaultdict(None, response.json())
     info = defaultdict(None)
     info["id"] = response["id"]
-    info["vendor"] = response["vendor"]
+    info["vendor"] = response["vendors"]
     info['descrtiption'] = response["info"]
     info["cwe"] = response["cwes"]
 

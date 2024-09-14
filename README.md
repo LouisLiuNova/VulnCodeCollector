@@ -47,6 +47,14 @@ GitHub的REST API仅支持通过personal access token进行认证。（[参考](
 
 [OpenCVE](https://www.opencve.io/)对免费用户提供60qph的API接口，应该足够使用了。
 
+在[Official register URL](https://app.opencve.io/signup/)注册。注册获得用户名和密码后在程序初始化时注册信息，后续可以自动从文件中调取。方式如下：
+
+```shell
+main.py opencve reg [username] [password]
+```
+
+> [!warning]暂定明文存储用户名和密码在`.env`，因此需要确保运行环境安全可控，建议使用随机生成的密码和不重要的用户名。
+
 ## TODO
 
 - [ ] OpenCVE的数据支持

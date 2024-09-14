@@ -5,6 +5,8 @@ from loguru import logger
 import requests
 import json
 from collections import defaultdict
+from requests.auth import HTTPBasicAuth
+from security import save_env_var, load_env_var
 
 def fetch_data_with_CVE_number(cve_number:str):
     """
@@ -28,7 +30,7 @@ def fetch_data_with_CVE_number(cve_number:str):
     open_cve_data = fetch_data_with_CWE_number_in_OpenCVE(cve_number)
     
     
-def fetch_data_with_CWE_number_in_NVD(cve_number:str):
+def fetch_data_with_CWE_number_in_NVD(cve_number:str)->dict:
     """
     Fetch data from NVD API with the given ONE CWE number. Data includes the description, references, and weakness. For the doc of the endpoint, refer https://nvd.nist.gov/developers/vulnerabilities 
     
@@ -45,13 +47,13 @@ def fetch_data_with_CWE_number_in_NVD(cve_number:str):
         response = requests.get(f"{BASE_ENDPOINT}?cveId={cve_number}")
         response.raise_for_status()
     except:
-        return False
+        return None
     
     logger.debug(response.json())
     response=response.json()
     if (vuln_info:=response["vulnerabilities"])==[] or response["resultsPerPage"]==0:
         logger.warning(f"No data found for {cve_number}")
-        return False
+        return None
     
     # Dump data and save to file
     # NOTE: Only fields "cve", "cveTags", "references" and "descriptions" are required, other fields are optional and may unexist.
@@ -95,17 +97,45 @@ def fetch_data_with_CWE_number_in_NVD(cve_number:str):
             
     
 
-def fetch_data_with_CWE_number_in_OpenCVE(cwe_number:str):
+def fetch_data_with_CWE_number_in_OpenCVE(cve_number:str):
     """
-    Fetch data from OpenCVE with the given ONE CWE number. Data includes vendor, product, CWEs. For the doc of the endpoint, refer https://docs.opencve.io/api/cve/
+    Fetch data from OpenCVE with the given ONE CvE number. Data includes vendor, product, CWEs. For the doc of the endpoint, refer https://docs.opencve.io/api/cve/
     
     Args:
-    cwe_number: str: The validated CWE number to fetch. Must be a valid CWE string like "CWE-1234" or "cwe-1234".
+    cve_number: str: The validated CvE number to fetch. Must be a valid CvE string like "CVE-2021-1234" or "cve-2021-1234".
     
     Returns:
     dict: The fetched and filtered data from OpenCVE.
     """
-    raise NotImplementedError("fetch_data_with_CWE_number_in_OpenCVE function not implemented yet")
+    BASE_ENDPOINT="https://www.opencve.io/api/cve/"
+    
+    # Load credentials
+    username=load_env_var("OPENCVE_USERNAME")
+    password=load_env_var("OPENCVE_PASSWORD")
+    if username is None or password is None:
+        # OpenCVE only supports basic authentication
+        logger.error("Failed to load OpenCVE credentials. Register it before fetching data from OpenCVE.")
+        return None
+    
+    # Send request
+    try:
+        logger.info(f"Fetching data from OpenCVE for {cve_number} with username {username} and password {password}")
+        
+        response=requests.get(f"{BASE_ENDPOINT}{cve_number}",auth=HTTPBasicAuth(username,password))
+        response.raise_for_status()
+    except:
+        logger.exception(f"Failed to fetch data from OpenCVE for {cve_number}")
+        return None
+
+    response=defaultdict(None,response.json())
+    info=defaultdict(None)
+    info["id"]=response["id"]
+    info["vendor"]=response["vendor"]
+    info['descrtiption']=response["info"]
+    info["cwe"]=response["cwes"]
+    return info 
+    
+    
 
 def validate_a_url_belongs_to_github(url:str):
     """

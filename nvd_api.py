@@ -55,13 +55,16 @@ def fetch_data_with_CVE_number(cve_number: str):
     githubURLs = list()
     if "GitHub" in result["references"]:
         for commit_url in result["references"]["GitHub"]:
+            # NOTE: remove this if too many CVEs's commit link has no patch tag
             if commit_url in result["references"]["Patch"]:
                 logger.info(
                     f"{cve_number} has a GitHub patch commit URL: {commit_url}")
                 githubURLs.append(commit_url)
 
     # Fetch source code from GitHub API
+    logger.debug(f"GitHub commit URLs: {githubURLs}")
     # TODO: The GitHub API is not implemented yet.
+    # Curl example command: curl -L -H "Accept: application/vnd.github+json"  -H "Authorization: Bearer <token>" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/LibRaw/LibRaw/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d
 
 
 def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:

@@ -1,0 +1,98 @@
+{
+  "sha": "2f912f5b33582961b1cdbd9fd828589f8b78f21d",
+  "node_id": "MDY6Q29tbWl0OTc5MTkyOjJmOTEyZjViMzM1ODI5NjFiMWNkYmQ5ZmQ4Mjg1ODlmOGI3OGYyMWQ=",
+  "commit": {
+    "author": {
+      "name": "Alex Tutubalin",
+      "email": "lexa@lexa.ru",
+      "date": "2013-05-24T17:24:03Z"
+    },
+    "committer": {
+      "name": "Alex Tutubalin",
+      "email": "lexa@lexa.ru",
+      "date": "2013-05-24T17:24:03Z"
+    },
+    "message": "fixed wrong data_maximum calcluation; prevent out-of-buffer in exp_bef",
+    "tree": {
+      "sha": "96c5176afd8d177aa7910b12c353700a91e05f9b",
+      "url": "https://api.github.com/repos/LibRaw/LibRaw/git/trees/96c5176afd8d177aa7910b12c353700a91e05f9b"
+    },
+    "url": "https://api.github.com/repos/LibRaw/LibRaw/git/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d",
+    "comment_count": 0,
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null
+    }
+  },
+  "url": "https://api.github.com/repos/LibRaw/LibRaw/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d",
+  "html_url": "https://github.com/LibRaw/LibRaw/commit/2f912f5b33582961b1cdbd9fd828589f8b78f21d",
+  "comments_url": "https://api.github.com/repos/LibRaw/LibRaw/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d/comments",
+  "author": {
+    "login": "alextutubalin",
+    "id": 443031,
+    "node_id": "MDQ6VXNlcjQ0MzAzMQ==",
+    "avatar_url": "https://avatars.githubusercontent.com/u/443031?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/alextutubalin",
+    "html_url": "https://github.com/alextutubalin",
+    "followers_url": "https://api.github.com/users/alextutubalin/followers",
+    "following_url": "https://api.github.com/users/alextutubalin/following{/other_user}",
+    "gists_url": "https://api.github.com/users/alextutubalin/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/alextutubalin/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/alextutubalin/subscriptions",
+    "organizations_url": "https://api.github.com/users/alextutubalin/orgs",
+    "repos_url": "https://api.github.com/users/alextutubalin/repos",
+    "events_url": "https://api.github.com/users/alextutubalin/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/alextutubalin/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "alextutubalin",
+    "id": 443031,
+    "node_id": "MDQ6VXNlcjQ0MzAzMQ==",
+    "avatar_url": "https://avatars.githubusercontent.com/u/443031?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/alextutubalin",
+    "html_url": "https://github.com/alextutubalin",
+    "followers_url": "https://api.github.com/users/alextutubalin/followers",
+    "following_url": "https://api.github.com/users/alextutubalin/following{/other_user}",
+    "gists_url": "https://api.github.com/users/alextutubalin/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/alextutubalin/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/alextutubalin/subscriptions",
+    "organizations_url": "https://api.github.com/users/alextutubalin/orgs",
+    "repos_url": "https://api.github.com/users/alextutubalin/repos",
+    "events_url": "https://api.github.com/users/alextutubalin/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/alextutubalin/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "f3065388c45fc08681623f067eca129b61cca4bd",
+      "url": "https://api.github.com/repos/LibRaw/LibRaw/commits/f3065388c45fc08681623f067eca129b61cca4bd",
+      "html_url": "https://github.com/LibRaw/LibRaw/commit/f3065388c45fc08681623f067eca129b61cca4bd"
+    }
+  ],
+  "stats": {
+    "total": 20,
+    "additions": 12,
+    "deletions": 8
+  },
+  "files": [
+    {
+      "sha": "e36c11a5b742055bb2bae583649f6302427cbfab",
+      "filename": "src/libraw_cxx.cpp",
+      "status": "modified",
+      "additions": 12,
+      "deletions": 8,
+      "changes": 20,
+      "blob_url": "https://github.com/LibRaw/LibRaw/blob/2f912f5b33582961b1cdbd9fd828589f8b78f21d/src%2Flibraw_cxx.cpp",
+      "raw_url": "https://github.com/LibRaw/LibRaw/raw/2f912f5b33582961b1cdbd9fd828589f8b78f21d/src%2Flibraw_cxx.cpp",
+      "contents_url": "https://api.github.com/repos/LibRaw/LibRaw/contents/src%2Flibraw_cxx.cpp?ref=2f912f5b33582961b1cdbd9fd828589f8b78f21d",
+      "patch": "@@ -2336,14 +2336,15 @@ int LibRaw::subtract_black()\n #define MAX(a,b) ((a) > (b) ? (a) : (b))\n #define LIM(x,min,max) MAX(min,MIN(x,max))\n #define CLIP(x) LIM(x,0,65535)\n-\n-            for(i=0; i< size*4; i++)\n+\t\t\tint dmax = 0;\n+\t\t\tfor(i=0; i< size*4; i++)\n               {\n                 int val = imgdata.image[0][i];\n                 val -= cblk[i & 3];\n                 imgdata.image[0][i] = CLIP(val);\n-                if(C.data_maximum < val) C.data_maximum = val;\n+                if(dmax < val) dmax = val;\n               }\n+\t\t\tC.data_maximum = dmax & 0xffff;\n #undef MIN\n #undef MAX\n #undef LIM\n@@ -2359,9 +2360,10 @@ int LibRaw::subtract_black()\n           // only calculate channel maximum;\n           int idx;\n           ushort *p = (ushort*)imgdata.image;\n-          C.data_maximum = 0;\n+\t\t  int dmax = 0;\n           for(idx=0;idx<S.iheight*S.iwidth*4;idx++)\n-            if(C.data_maximum < p[idx]) C.data_maximum = p[idx];\n+            if(dmax < p[idx]) dmax = p[idx];\n+\t\t  C.data_maximum = dmax;\n         }\n \t\treturn 0;\n \t}\n@@ -2421,8 +2423,10 @@ void LibRaw::exp_bef(float shift, float smooth)\n             imgdata.image[i][3] = lut[imgdata.image[i][3]];\n         }\n \n-    C.data_maximum = lut[C.data_maximum];\n-    C.maximum = lut[C.maximum];\n+\tif(C.data_maximum <=TBLN)\n+\t\tC.data_maximum = lut[C.data_maximum];\n+\tif(C.maximum <= TBLN)\n+\t\tC.maximum = lut[C.maximum];\n     // no need to adjust the minumum, black is already subtracted\n     free(lut);\n }\n@@ -2530,7 +2534,7 @@ int LibRaw::dcraw_process(void)\n \n         raw2image_ex(subtract_inline); // allocate imgdata.image and copy data!\n \n-        int save_4color = O.four_color_rgb;\n+\t\tint save_4color = O.four_color_rgb;\n \n         if (IO.zero_is_bad) \n           {"
+    }
+  ]
+}

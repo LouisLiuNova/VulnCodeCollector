@@ -7,7 +7,7 @@ import json
 from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 from security import save_env_var, load_env_var
-
+import os
 def fetch_data_with_CVE_number(cve_number:str):
     """
     Fetch the data from the NVD API and OpenCVE with the given ONE CVE number. If vaild, save the data to `./data/[cve-number]/` and continue to fetch source code from the GitHub API.
@@ -26,16 +26,42 @@ def fetch_data_with_CVE_number(cve_number:str):
         logger.warning(f"{cve_number} is not a valid CVE number, skipping")
         return False
     
-    nvd_data = fetch_data_with_CWE_number_in_NVD(cve_number)
-    open_cve_data = fetch_data_with_CWE_number_in_OpenCVE(cve_number)
+    nvd_data = fetch_data_with_CVE_number_in_NVD(cve_number)
+    open_cve_data = fetch_data_with_CVE_number_in_OpenCVE(cve_number)
     
+    # Merge data
+    if nvd_data is None or open_cve_data is None:
+        logger.warning(f"Failed to fetch data for {cve_number}")
+        return False
+    result=defaultdict(None,nvd_data)
+    result["vendor"]=open_cve_data["vendor"]
+    # NOTE: More info from OpenCVE can be added here.
     
-def fetch_data_with_CWE_number_in_NVD(cve_number:str)->dict:
+    # Save data to `./data/{cve_number}/{cve_number}.json`. If the directory does not exist, create it.
+    data_dir=f"./data/{cve_number}"
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+    with open(f"{data_dir}/{cve_number}.json","w") as f:
+        json.dump(result,f)
+    logger.info(f"Successfully saved data for {cve_number} to {data_dir}/{cve_number}.json")
+    
+    # Retrive GitHub commit URLs and fetch commit message via GitHub API
+    githubURLs=list()
+    if "GitHub" in result["references"]:
+        for commit_url in result["references"]["GitHub"]:
+            if commit_url in result["references"]["Patch"]:
+                logger.info(f"{cve_number} has a GitHub patch commit URL: {commit_url}")
+                githubURLs.append(commit_url)
+
+    # Fetch source code from GitHub API
+    # TODO: The GitHub API is not implemented yet.
+
+def fetch_data_with_CVE_number_in_NVD(cve_number:str)->dict:
     """
-    Fetch data from NVD API with the given ONE CWE number. Data includes the description, references, and weakness. For the doc of the endpoint, refer https://nvd.nist.gov/developers/vulnerabilities 
+    Fetch data from NVD API with the given ONE CVE number. Data includes the description, references, and weakness. For the doc of the endpoint, refer https://nvd.nist.gov/developers/vulnerabilities 
     
     Args:
-    cwe_number: str: The validated CWE number to fetch. Must be a valid CWE string like "CWE-1234" or "cwe-1234".
+    cve_number: str: The validated CVE number to fetch. Must be a valid CVE string like "CVE-2021-1234" or "cve-2021-1234".
     
     Return:
     dict: The fetched and filtered data from NVD API.
@@ -97,7 +123,7 @@ def fetch_data_with_CWE_number_in_NVD(cve_number:str)->dict:
             
     
 
-def fetch_data_with_CWE_number_in_OpenCVE(cve_number:str):
+def fetch_data_with_CVE_number_in_OpenCVE(cve_number:str):
     """
     Fetch data from OpenCVE with the given ONE CvE number. Data includes vendor, product, CWEs. For the doc of the endpoint, refer https://docs.opencve.io/api/cve/
     
@@ -133,13 +159,24 @@ def fetch_data_with_CWE_number_in_OpenCVE(cve_number:str):
     info["vendor"]=response["vendor"]
     info['descrtiption']=response["info"]
     info["cwe"]=response["cwes"]
+    
+    # Dump request headers and check rate limit
+    logger.debug(response.headers)
+    if "X-RateLimit-Remaining" in response.headers and "X-RateLimit-Limit" in response.headers and "Retry-After" in response.headers:
+        remaining=response.headers["X-RateLimit-Remaining"]
+        limit=response.headers["X-RateLimit-Limit"]
+        if remaining<=limit//10:
+            logger.warning(f"Rate limit is running low. Remaining: {remaining}/{limit}. Retry after {response.headers['Retry-After']} seconds.")
+        else:
+            logger.info(f"Rate limit remaining: {response.headers['X-RateLimit-Remaining']}")
+            
     return info 
     
     
 
 def validate_a_url_belongs_to_github(url:str):
     """
-    Validate a URL belongs to GitHub.
+    Validate a URL belongs to GitHub commit.
     
     Args:
     url: str: The URL to validate.

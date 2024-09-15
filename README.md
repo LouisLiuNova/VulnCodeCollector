@@ -14,13 +14,12 @@ OpenCVE-->|Vendor infos|MergedData
 NVD-->|Basic infos| MergedData
 MergedData-->|CVE infos|GitHub[GitHub API]
 GitHub-->|Source codes|Local
-Local-->Database[Database-Mongo-TBD]
 ```
 
-获取的文件暂时可能包括：
+获取的文件包括：
 
-- [ ] 漏洞的信息描述(.json)
-- [ ] GitHub提供的patch前/后文件+.diff
+- [x] 漏洞的信息描述(.json)
+- [x] GitHub提供的patch前/后文件+.diff
 - [ ] 可以导入Lark或者腾讯文档的.csv文件
 
 ## Install
@@ -32,30 +31,45 @@ conda env create -f environment.yaml
 conda activate vulnsrc
 ```
 
-### GitHub Auth
+### Get GitHub Token
 
 > [!tip]
-> GitHub REST API存在用量限制，可以通过认证访问令牌获取更多的请求速率。参见[Official doc](https://docs.github.com/zh/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28)
+> 关于GitHub提供的API更多信息，请参阅[Official Doc](https://docs.github.com/zh/rest?apiVersion=2022-11-28)
 
-GitHub的REST API仅支持通过personal access token进行认证。（[参考](https://docs.github.com/zh/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28#authenticating-with-username-and-password)）
+> [!tip]
+> 本项目的GitHub REST API基于当前最新的版本`2022-11-28`
 
-参考[Official doc](https://docs.github.com/zh/rest/quickstart?apiVersion=2022-11-28)可以获取更多信息。
+GitHub的API需要提供[Personal Access Token](https://docs.github.com/zh/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28)进行验证。请参考[Official Doc](https://docs.github.com/zh/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#创建-personal-access-token-classic)生成个人使用的PAT以使用GitHub API。在token的作用域选择上，为保证token的最小权限，不需要选择任何额外的权限，因为本项目只访问公开的repo。
 
-[获取与使用personal access token](https://docs.github.com/zh/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#创建-personal-access-token-classic)
-
-### OpenCVE Auth
-
-[OpenCVE](https://www.opencve.io/)对免费用户提供60qph的API接口，应该足够使用了。
-
-在[Official register URL](https://app.opencve.io/signup/)注册。注册获得用户名和密码后在程序初始化时注册信息，后续可以自动从文件中调取。方式如下：
+在获取到PAT后，运行下面的指令注册token到本机的环境变量中。Token将保存在`.env`中。
 
 ```shell
-main.py opencve reg [username] [password]
+python3 main.py register github [yourPAT]
 ```
 
-> [!warning]暂定明文存储用户名和密码在`.env`，因此需要确保运行环境安全可控，建议使用随机生成的密码和不重要的用户名。
+> [!warning]本项目暂时明文存储token在`.env`，因此需要确保本地运行环境安全可控，以避免不必要的token泄漏。未来可能用某种方法加密存储credentials。
+
+### Get OpenCVE Account
+
+> [!tip]
+> 关于OpenCVE提供的API更多信息，请参阅[Official Doc](https://docs.opencve.io/api/)
+
+[OpenCVE](https://www.opencve.io/)的API需要通过基于用户名和密码的基本认证。OpenCVE为注册的免费用户提供1000qph的rate limit。在[Official register URL](https://app.opencve.io/signup/)注册账号，并通过类似的方法注册用户名和密码到本机的环境变量中。
+
+```shell
+python3 main.py register opencve [username] [password]
+```
+
+> [!warning]本项目暂时明文存储账户和密码在`.env`，因此需要确保本地运行环境安全可控，建议使用随机生成的密码和不重要的用户名。
+
+## Usage
+
+```shell
+TBD
+```
 
 ## TODO
 
-- [ ] OpenCVE的数据支持
-- [ ] 针对Linux Kernel项目的CVE，从git.kernel.org拿信息而不是GitHub
+- [x] 添加对OpenCVE的API支持
+- [ ] 添加对Linux kernel git的支持 (issue #2)
+- [ ] 导出数据为兼容腾讯文档/飞书格式的csv文件方便阅览和共享

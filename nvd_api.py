@@ -39,7 +39,7 @@ def fetch_data_with_CVE_number(cve_number: str):
     result = defaultdict(None, nvd_data)
     result["vendor"] = open_cve_data["vendor"]
     result["title"] = open_cve_data["title"]
-
+    result["weaknesses"]=open_cve_data["cwe"]
     # NOTE: More info from OpenCVE can be added here.
 
     # Save data to `./data/{cve_number}/{cve_number}.json`. If the directory does not exist, create it.
@@ -60,6 +60,7 @@ def fetch_data_with_CVE_number(cve_number: str):
                 logger.info(
                     f"{cve_number} has a GitHub patch commit URL: {commit_url}")
                 githubURLs.append(commit_url)
+    # FIXME: Unable to fetch source code from GitHub API temperarily
     if githubURLs == []:
         # No GitHub commit URL found
         # TODO: Add support for linux kernel patch
@@ -110,6 +111,7 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
     info["status"] = vuln_info["vulnStatus"]
 
     # Dump weakness data
+    # FIXME: This field is not dumped from NVD. Use OpenCVE data instead temperarily.
     weakness = list()
     if "weakness" in vuln_info:
         for cwe in vuln_info["weakness"]:
@@ -118,7 +120,7 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
                     if lang["lang"] == "en":
                         weakness.append(lang["value"])
                         break
-    info["weakness"] = weakness
+    info["weaknesses"] = weakness # NOTE: Will be replaced by OpenCVE data later.
 
     # Dump references data
     # NOTE: the field "references" is a dict, the key is the tag and the value is a list of URLs in this tag. Some URLs may belong to multiple tags so they may appear in multiple tags.

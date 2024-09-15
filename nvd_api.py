@@ -107,18 +107,6 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
         (desc['value'] for desc in vuln_info['descriptions'] if desc['lang'] == 'en'), "No desc yet")
     info["status"] = vuln_info["vulnStatus"]
 
-    # Dump weakness data
-    # FIXME: This field is not dumped from NVD. Use OpenCVE data instead temperarily.
-    weakness = list()
-    if "weakness" in vuln_info:
-        for cwe in vuln_info["weakness"]:
-            if "description" in cwe:
-                for lang in cwe["description"]:
-                    if lang["lang"] == "en":
-                        weakness.append(lang["value"])
-                        break
-    info["weaknesses"] = weakness # NOTE: Will be replaced by OpenCVE data later.
-
     # Dump references data
     # NOTE: the field "references" is a dict, the key is the tag and the value is a list of URLs in this tag. Some URLs may belong to multiple tags so they may appear in multiple tags.
     references = defaultdict(list)

@@ -55,12 +55,9 @@ def fetch_data_with_CVE_number(cve_number: str):
     githubURLs = list()
     if "GitHub" in result["references"]:
         for commit_url in result["references"]["GitHub"]:
-            # NOTE: remove this if too many CVEs's commit link has no patch tag
-            if commit_url in result["references"]["Patch"]:
-                logger.info(
+            logger.info(
                     f"{cve_number} has a GitHub patch commit URL: {commit_url}")
-                githubURLs.append(commit_url)
-    # FIXME: Unable to fetch source code from GitHub API temperarily
+            githubURLs.append(commit_url)
     if githubURLs == []:
         # No GitHub commit URL found
         # TODO: Add support for linux kernel patch

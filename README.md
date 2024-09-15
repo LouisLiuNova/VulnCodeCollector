@@ -47,7 +47,8 @@ GitHub的API需要提供[Personal Access Token](https://docs.github.com/zh/rest/
 python3 main.py register github [yourPAT]
 ```
 
-> [!warning]本项目暂时明文存储token在`.env`，因此需要确保本地运行环境安全可控，以避免不必要的token泄漏。未来可能用某种方法加密存储credentials。
+> [!caution]
+> 本项目暂时明文存储token在`.env`，因此需要确保本地运行环境安全可控，以避免不必要的token泄漏。未来可能用某种方法加密存储credentials。
 
 ### Get OpenCVE Account
 
@@ -60,7 +61,7 @@ python3 main.py register github [yourPAT]
 python3 main.py register opencve [username] [password]
 ```
 
-> [!warning]
+> [!caution]
 > 本项目暂时明文存储账户和密码在`.env`，因此需要确保本地运行环境安全可控，建议使用随机生成的密码和不重要的用户名。
 
 ## Usage

@@ -60,12 +60,18 @@ def fetch_data_with_CVE_number(cve_number: str):
                 logger.info(
                     f"{cve_number} has a GitHub patch commit URL: {commit_url}")
                 githubURLs.append(commit_url)
-
+    if githubURLs == []:
+        # No GitHub commit URL found
+        # TODO: Add support for linux kernel patch
+        logger.warning(f"No GitHub commit URL found for {cve_number}. End fetching.")
+        return True
+    
     # Fetch source code from GitHub API
     logger.debug(f"GitHub commit URLs: {githubURLs}")
     # TODO: The GitHub API is not implemented yet.
     # Curl example command: curl -L -H "Accept: application/vnd.github+json"  -H "Authorization: Bearer <token>" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/LibRaw/LibRaw/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d
-
+    for commit_url in githubURLs:
+        pass
 
 def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
     """
@@ -127,7 +133,7 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
             # TODO: if the URL does not belong to the vendor fetched from the openCVE, we will ignore it. For why we need to do this, refer to CVE-2015-3885 in NVD.
             for tag in tags:
                 references[tag].append(ref_url["url"])
-            # To validate if the URL is a GitHub commit. If so, we will relove it later and fetch the source code from the GitHub API.
+            # To validate if the URL is a GitHub commit. If so, we will regard it as a patch commit and relove it later and fetch the source code from the GitHub API.
             if validate_a_url_belongs_to_github(ref_url["url"]):
                 logger.info(f"Found a GitHub commit URL for {
                             cve_number}: {ref_url['url']}")

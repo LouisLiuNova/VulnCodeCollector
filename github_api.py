@@ -192,6 +192,6 @@ def resolve_commit_url(commit_url: str):
 
 def is_code_file(file_path:pathlib.Path):
     # 获取文件扩展名
-    code_file_extensions = {'.py', '.c', '.cpp', '.java', '.js', '.ts', '.rb', '.php', '.html', '.css', '.go', '.rs'}
+    code_file_extensions = {'.py','.h','.c', '.cpp', '.java', '.js', '.ts', '.rb', '.php', '.html', '.css', '.go', '.rs'}
     return pathlib.Path(file_path).suffix.lower() in code_file_extensions
     

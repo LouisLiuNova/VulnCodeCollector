@@ -60,7 +60,8 @@ python3 main.py register github [yourPAT]
 python3 main.py register opencve [username] [password]
 ```
 
-> [!warning]本项目暂时明文存储账户和密码在`.env`，因此需要确保本地运行环境安全可控，建议使用随机生成的密码和不重要的用户名。
+> [!warning]
+> 本项目暂时明文存储账户和密码在`.env`，因此需要确保本地运行环境安全可控，建议使用随机生成的密码和不重要的用户名。
 
 ## Usage
 

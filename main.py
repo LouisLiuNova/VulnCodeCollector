@@ -4,6 +4,8 @@ import pathlib
 from loguru import logger
 import fire
 from security import save_env_var, load_env_var
+from tqdm import tqdm
+from nvd_api import fetch_data_with_CVE_number
 
 
 class App(object):
@@ -16,6 +18,13 @@ class App(object):
     def fetch(self, csv_path: pathlib.Path):
         """ Main function to fetch the data from the remote API and save it to ./data."""
         logger.info(f"Fetching data from {csv_path}")
+        with open(csv_path, "r") as f:
+            cve_numbers = f.readlines()
+        with tqdm(total=len(cve_numbers), desc="Processing CVEs") as pbar:
+            for cve in cve_numbers:
+                fetch_data_with_CVE_number(cve.strip())
+                pbar.update(1)
+        logger.info(f"Successfully fetched all data from {csv_path}")
 
     def export(self, output_path: pathlib.Path):
         """ Main function to export the data to the remote API."""

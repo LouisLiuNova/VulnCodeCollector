@@ -75,3 +75,4 @@ TBD
 - [x] 添加对OpenCVE的API支持
 - [ ] 添加对Linux kernel git的支持 (issue #2)
 - [ ] 导出数据为兼容腾讯文档/飞书格式的csv文件方便阅览和共享
+- [ ] 调用大模型对commit进行分析，确定出现漏洞的文件

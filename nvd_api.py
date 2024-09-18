@@ -34,12 +34,13 @@ def fetch_data_with_CVE_number(cve_number: str):
 
     # Merge data
     if nvd_data is None or open_cve_data is None:
-        logger.warning(f"Failed to fetch data for {cve_number}")
+        logger.warning(f"Failed to fetch data for {cve_number}: NVD:{
+                       nvd_data is not None}, OpenCVE:{open_cve_data is not None}")
         return False
     result = defaultdict(None, nvd_data)
     result["vendor"] = open_cve_data["vendor"]
     result["title"] = open_cve_data["title"]
-    result["weaknesses"]=open_cve_data["cwe"]
+    result["weaknesses"] = open_cve_data["cwe"]
     # NOTE: More info from OpenCVE can be added here.
 
     # Save data to `./data/{cve_number}/{cve_number}.json`. If the directory does not exist, create it.
@@ -56,20 +57,22 @@ def fetch_data_with_CVE_number(cve_number: str):
     if "GitHub" in result["references"]:
         for commit_url in result["references"]["GitHub"]:
             logger.info(
-                    f"{cve_number} has a GitHub patch commit URL: {commit_url}")
+                f"{cve_number} has a GitHub patch commit URL: {commit_url}")
             githubURLs.append(commit_url)
     if githubURLs == []:
         # No GitHub commit URL found
         # TODO: Add support for linux kernel patch
-        logger.warning(f"No GitHub commit URL found for {cve_number}. End fetching.")
+        logger.warning(f"No GitHub commit URL found for {
+                       cve_number}. End fetching.")
         return True
-    
+
     # Fetch source code from GitHub API
     logger.debug(f"GitHub commit URLs: {githubURLs}")
     # TODO: The GitHub API is not implemented yet.
     # Curl example command: curl -L -H "Accept: application/vnd.github+json"  -H "Authorization: Bearer <token>" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/LibRaw/LibRaw/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d
     for commit_url in githubURLs:
         pass
+
 
 def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
     """
@@ -84,10 +87,24 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
 
     # Fetch data from NVD API
     BASE_ENDPOINT = "https://services.nvd.nist.gov/rest/json/cves/2.0"
+
+    # Load credentials
+    token = load_env_var("NVD_TOKEN")
+    if token is None:
+        logger.error(
+            "Failed to load NVD token. Register it before fetching data from NVD.")
+        return None
+    headers = {
+        "apiKey": token
+    }
+
+    logger.info(f"Fetching data for {cve_number} from NVD API")
     try:
-        response = requests.get(f"{BASE_ENDPOINT}?cveId={cve_number}")
+        response = requests.get(f"{BASE_ENDPOINT}?cveId={
+                                cve_number}", headers=headers)
         response.raise_for_status()
     except:
+        logger.exception(f"Failed to fetch data from NVD for {cve_number}")
         return None
 
     logger.debug(response.json())
@@ -125,6 +142,7 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
                 logger.info(f"Found a GitHub commit URL for {
                             cve_number}: {ref_url['url']}")
                 references["GitHub"].append(ref_url["url"])
+    logger.debug(f"{info=}")
     info["references"] = references
 
     return info
@@ -142,6 +160,7 @@ def fetch_data_with_CVE_number_in_OpenCVE(cve_number: str):
     """
     BASE_ENDPOINT = "https://app.opencve.io/api/cve/"
 
+    logger.info(f"Fetching data for {cve_number} from OpenCVE")
     # Load credentials
     username = load_env_var("OPENCVE_USERNAME")
     password = load_env_var("OPENCVE_PASSWORD")

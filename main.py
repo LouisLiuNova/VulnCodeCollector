@@ -6,6 +6,7 @@ import fire
 from security import save_env_var, load_env_var
 from tqdm import tqdm
 from nvd_api import fetch_data_with_CVE_number
+from os import sleep
 
 
 class App(object):
@@ -24,6 +25,8 @@ class App(object):
             for cve in cve_numbers:
                 fetch_data_with_CVE_number(cve.strip())
                 pbar.update(1)
+                # NOTE: follow the best practice of API rate limiting here: https://nvd.nist.gov/developers/start-here
+                sleep(3)
         logger.info(f"Successfully fetched all data from {csv_path}")
 
     def export(self, output_path: pathlib.Path):
@@ -54,6 +57,12 @@ class Register(object):
         logger.info(f"Registering a new user for Github")
         save_env_var("GITHUB_TOKEN", token)
         logger.info(f"Successfully registered a new user for Github")
+        return
+
+    def nvd(self, token: str):
+        logger.info(f"Registering a new user for NVD")
+        save_env_var("NVD_TOKEN", token)
+        logger.info(f"Successfully registered a new user for NVD")
         return
 
 

@@ -31,6 +31,21 @@ conda env create -f environment.yaml
 conda activate vulnsrc
 ```
 
+### Get NVD API key
+
+>[!tip]
+> 关于NVD API更多信息，参阅[Official Doc](https://nvd.nist.gov/developers/start-here)
+
+参考#4，NVD数据库对于无key的匿名访问限制每30秒最多5次，而使用API可以在30秒内访问50次。在该[链接](https://nvd.nist.gov/developers/request-an-api-key)处请求一个API key，并执行下面的命令注册到本机上：
+
+```shell
+python3 main.py register nvd [yourKey]
+```
+
+> [!caution]
+> 本项目暂时明文存储token在`.env`，因此需要确保本地运行环境安全可信，以避免不必要的token泄漏。未来可能用某种方法加密存储credentials。
+>
+
 ### Get GitHub Token
 
 > [!tip]
@@ -48,7 +63,7 @@ python3 main.py register github [yourPAT]
 ```
 
 > [!caution]
-> 本项目暂时明文存储token在`.env`，因此需要确保本地运行环境安全可控，以避免不必要的token泄漏。未来可能用某种方法加密存储credentials。
+> 本项目暂时明文存储token在`.env`，因此需要确保本地运行环境安全可信，以避免不必要的token泄漏。未来可能用某种方法加密存储credentials。
 
 ### Get OpenCVE Account
 
@@ -62,7 +77,7 @@ python3 main.py register opencve [username] [password]
 ```
 
 > [!caution]
-> 本项目暂时明文存储账户和密码在`.env`，因此需要确保本地运行环境安全可控，建议使用随机生成的密码和不重要的用户名。
+> 本项目暂时明文存储账户和密码在`.env`，因此需要确保本地运行环境安全可信，建议使用随机生成的密码和不重要的用户名。
 
 ## Usage
 

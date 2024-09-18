@@ -9,6 +9,7 @@ from loguru import logger
 from collections import defaultdict
 from security import load_env_var
 from urllib.parse import urlparse, parse_qs
+import json
 
 
 def fetch_patch_source_code(cve_number: str, commit_url: str):
@@ -135,6 +136,12 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
         with open(f"data/{cve_number}/{info['commit_sha']}/patched/{filename}", "w") as f:
             f.write(file_content)
         logger.info(f"Successfully saved file {filename}.")
+
+        # Save the commit infos
+        with open(f"data/{cve_number}/{info['commit_sha']}/{info['commit_sha']}.json", "w")as f:
+            json.dump(info, f)
+        logger.info(f"Successfully saved commit info to {
+                    info['commit_sha']}.json.")
 
 
 def fetch_file_content(

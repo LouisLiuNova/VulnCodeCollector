@@ -49,7 +49,7 @@ def fetch_data_with_CVE_number(cve_number: str):
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
     with open(f"{data_dir}/{cve_number}.json", "w") as f:
-        json.dump(result, f)
+        json.dump(result, f, indent=4)
     logger.info(f"Successfully saved data for {
                 cve_number} to {data_dir}/{cve_number}.json")
 

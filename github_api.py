@@ -139,7 +139,7 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
 
         # Save the commit infos
         with open(f"data/{cve_number}/{info['commit_sha']}/{info['commit_sha']}.json", "w")as f:
-            json.dump(info, f)
+            json.dump(info, f, indent=4)
         logger.info(f"Successfully saved commit info to {
                     info['commit_sha']}.json.")
 

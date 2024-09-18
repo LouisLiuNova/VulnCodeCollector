@@ -7,6 +7,7 @@ from security import save_env_var, load_env_var
 from tqdm import tqdm
 from nvd_api import fetch_data_with_CVE_number
 from time import sleep
+import sys
 
 
 class App(object):
@@ -67,4 +68,8 @@ class Register(object):
 
 
 if __name__ == "__main__":
+    # 移除默认的日志处理器
+    logger.remove()
+    # 添加新的日志处理器，并设置日志等级，例如 "INFO"
+    logger.add(sys.stdout, level="INFO")
     fire.Fire({'run': App, 'register': Register})

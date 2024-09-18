@@ -27,7 +27,8 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
     # Load credentials
     token = load_env_var("GITHUB_TOKEN")
     if token is None:
-        logger.error("Failed to load GitHub token. Please register a token first.")
+        logger.error(
+            "Failed to load GitHub token. Please register a token first.")
         return
 
     # TODO: Resolve commit URL
@@ -43,7 +44,8 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
             "X-GitHub-Api-Version": "2022-11-28",
         }
         res = requests.get(
-            f"{BASE_ENDPOINT}/repos/{info['owner']}/{info['repo']}/commits/{info['commit_sha']}",
+            f"{BASE_ENDPOINT}/repos/{info['owner']
+                                     }/{info['repo']}/commits/{info['commit_sha']}",
             headers=headers,
         )
         res.raise_for_status()
@@ -53,12 +55,16 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
         return None
 
     logger.info(f"Fetch commit {info['commit_sha']} info successfully.")
-
+    logger.debug(f"{commit_info=}")
     # Resolve the patch URL and collect the basic information of the patch
     info["commit_massage"] = commit_info["commit"]["message"]
     info["raw_ref"] = commit_info["url"]
     info["html_ref"] = commit_info["html_url"]
-    info["author"] = commit_info["author"]["login"]
+    # NOTE: to prevent json like  "author": null,"committer": null
+    if commit_info["author"] is None:
+        info["author"] = commit_info["commit"]["author"]["name"]
+    else:
+        info["author"] = commit_info["author"]["login"]
     info["changes_stats"] = commit_info["stats"]
     info["files"] = commit_info["files"]
     info["parent_commit_sha"] = commit_info["parents"][0]["sha"]
@@ -70,7 +76,8 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
 
         # Filter source code files
         if not is_code_file(file["filename"]):
-            logger.warning(f"Skip file {file_name} since it's not a source code file.")
+            logger.warning(
+                f"Skip file {file_name} since it's not a source code file.")
             continue
         # Filter files in different status. Including: added, modified, deleted
         if file["status"] == "deleted":
@@ -82,9 +89,9 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
             )
             pass  # NOTE: No more action needed for added files.
         elif file["status"] == "modified":
-            logger.info(f"File {file_name} is modified so fetch the previous version.")
+            logger.info(
+                f"File {file_name} is modified so fetch the previous version.")
             # Fetch the previous version of the file
-            # TODO: Fetch the previous version of the file
             # NOTE: Files in the current commit can be fetched from the URL in file["raw_url"]
             # NOTE: Dont forget to save .diff
             fetch_file_content(
@@ -110,7 +117,8 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
 
         else:
             logger.warning(
-                f"Skip file {file_name} since it's in unrecognized status {file['status']}."
+                f"Skip file {file_name} since it's in unrecognized status {
+                    file['status']}."
             )
             continue
 
@@ -118,18 +126,19 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
         download_url = file["raw_url"]
         file_content = requests.get(download_url).text
         # Rename the file with the naming rules for vulnerable files
-        filename = f"{cve_number}_{info['repo']}_{file_name}_patched{pathlib.Path(file['filename']).suffix.lower()}"
+        filename = f"{cve_number}_{info['repo']}_{file_name}_patched{
+            pathlib.Path(file['filename']).suffix.lower()}"
         logger.info(f"Saving file {file_name} as {filename}...")
         # Check if the directory exists
-        pathlib.Path(f"data/{cve_number}/{info['commit_sha']}/patched").mkdir(parents=True, exist_ok=True)
+        pathlib.Path(
+            f"data/{cve_number}/{info['commit_sha']}/patched").mkdir(parents=True, exist_ok=True)
         with open(f"data/{cve_number}/{info['commit_sha']}/patched/{filename}", "w") as f:
             f.write(file_content)
         logger.info(f"Successfully saved file {filename}.")
 
 
 def fetch_file_content(
-    cve_number: str, owner: str, repo: str, file_path: str, commit_sha: str
-,parent_commit_sha: str):
+        cve_number: str, owner: str, repo: str, file_path: str, commit_sha: str, parent_commit_sha: str):
     """
     Fetch the content of the given file from the given commit hash and then save it.
     Args:
@@ -146,7 +155,8 @@ def fetch_file_content(
     # Load credentials
     token = load_env_var("GITHUB_TOKEN")
     if token is None:
-        logger.error("Failed to load GitHub token. Please register a token first.")
+        logger.error(
+            "Failed to load GitHub token. Please register a token first.")
         return
 
     # Fetch the file content
@@ -175,11 +185,13 @@ def fetch_file_content(
     file_content = requests.get(download_url).text
 
     # Rename the file with the naming rules for vulnerable files
-    filename = f"{cve_number}_{repo}_{file_name}_vulnerable{pathlib.Path(file_path).suffix.lower()}"
+    filename = f"{cve_number}_{repo}_{file_name}_vulnerable{
+        pathlib.Path(file_path).suffix.lower()}"
     logger.info(f"Saving file {file_name} as {filename}...")
 
     # Check if the directory exists
-    pathlib.Path(f"data/{cve_number}/{commit_sha}/vulnerable").mkdir(parents=True, exist_ok=True)
+    pathlib.Path(
+        f"data/{cve_number}/{commit_sha}/vulnerable").mkdir(parents=True, exist_ok=True)
     with open(f"data/{cve_number}/{commit_sha}/vulnerable/{filename}", "w") as f:
         f.write(file_content)
 
@@ -202,7 +214,8 @@ def resolve_commit_url(commit_url: str):
     parsed_url = urlparse(commit_url)
     paths = parsed_url.path.split("/")[
         1:
-    ]  # NOTE: should be like ['LibRaw', 'LibRaw', 'commit', '4606c28f494a750892c5c1ac7903e62dd1c6fdb5']. [1:] is to strip the first empty segment.
+        # NOTE: should be like ['LibRaw', 'LibRaw', 'commit', '4606c28f494a750892c5c1ac7903e62dd1c6fdb5']. [1:] is to strip the first empty segment.
+    ]
     res["owner"] = paths[0]
     res["repo"] = paths[1]
     res["commit_sha"] = paths[-1]

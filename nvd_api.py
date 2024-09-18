@@ -6,7 +6,8 @@ import requests
 import json
 from collections import defaultdict
 from requests.auth import HTTPBasicAuth
-from security import save_env_var, load_env_var
+from github_api import fetch_patch_source_code
+from security import load_env_var
 import os
 import base64
 
@@ -71,7 +72,7 @@ def fetch_data_with_CVE_number(cve_number: str):
     # TODO: The GitHub API is not implemented yet.
     # Curl example command: curl -L -H "Accept: application/vnd.github+json"  -H "Authorization: Bearer <token>" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/LibRaw/LibRaw/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d
     for commit_url in githubURLs:
-        pass
+        fetch_patch_source_code(cve_number, commit_url)
 
 
 def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:

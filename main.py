@@ -6,7 +6,7 @@ import fire
 from security import save_env_var, load_env_var
 from tqdm import tqdm
 from nvd_api import fetch_data_with_CVE_number
-from os import sleep
+from time import sleep
 
 
 class App(object):

@@ -10,6 +10,7 @@ from github_api import fetch_patch_source_code
 from security import load_env_var
 import os
 import base64
+from time import sleep
 
 
 def fetch_data_with_CVE_number(cve_number: str):
@@ -31,6 +32,7 @@ def fetch_data_with_CVE_number(cve_number: str):
         return False
 
     nvd_data = fetch_data_with_CVE_number_in_NVD(cve_number)
+    sleep(5)
     open_cve_data = fetch_data_with_CVE_number_in_OpenCVE(cve_number)
 
     # Merge data

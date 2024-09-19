@@ -259,10 +259,12 @@ def resolve_vendor(vendor_infos: list) -> dict:
     for vendor in vendor_infos:
         if "$PRODUCT$" in vendor:
             vendor, product = vendor.split("$PRODUCT$")
-            if vendor in vendor_infos:
+            if vendor in vendor_infos and product not in result[vendor]:
                 result[vendor].append(product)
-            else:
+            elif vendor not in vendor_infos:
                 result[vendor] = [product]
+            else:
+                pass  # 重复的vendor
         else:
             result[vendor] = [vendor]
 

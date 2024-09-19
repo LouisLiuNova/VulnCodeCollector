@@ -187,7 +187,8 @@ def fetch_data_with_CVE_number_in_OpenCVE(cve_number: str):
     response_text = defaultdict(None, response.json())
     info = defaultdict(None)
     info["id"] = response_text["cve_id"]
-    info["vendor"] = response_text["vendors"]
+    # NOTE: to resolve the vendor info
+    info["vendor"] = resolve_vendor(response_text["vendors"])
     info["title"] = response_text["title"]
     info['descrtiption'] = response_text["description"]
     info["cwe"] = response_text["weaknesses"]
@@ -231,3 +232,38 @@ def validate_cve(cve_id: str) -> bool:
     if re.match(pattern, cve_id):
         return True
     return False
+
+
+def resolve_vendor(vendor_infos: list) -> dict:
+    """
+    Resolve vendor info from OpenCVE API response and return structured data.
+
+    Args:
+    vendor_infos: list: The vendor info list from OpenCVE API response like:
+    "vendor": [
+        "qemu",
+        "qemu$PRODUCT$qemu",
+        "redhat",
+        "redhat$PRODUCT$enterprise_linux",
+        "redhat$PRODUCT$openstack"
+    ]
+
+    Returns:
+    dict: The structured vendor info like:
+    {
+        "qemu": ["qemu"],
+        "redhat": ["enterprise_linux","openstack"]
+    }
+    """
+    result = dict()
+    for vendor in vendor_infos:
+        if "$PRODUCT$" in vendor:
+            vendor, product = vendor.split("$PRODUCT$")
+            if vendor in vendor_infos:
+                result[vendor].append(product)
+            else:
+                result[vendor] = [product]
+        else:
+            result[vendor] = [vendor]
+
+    return result

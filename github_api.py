@@ -126,9 +126,10 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
         # Fetch the patched version of the file
         download_url = file["raw_url"]
         file_content = requests.get(download_url).text
+        file_name_without_ext = os.path.splitext(file_name)[0]  # 获取不带扩展名的文件名
         # Rename the file with the naming rules for vulnerable files
-        filename = f"{cve_number}_{info['repo']}_{file_name}_patched{
-            pathlib.Path(file['filename']).suffix.lower()}"
+        filename = f"{cve_number}_{info['repo']}_patched_{
+            os.path.basename(file['filename'])}"
         logger.info(f"Saving file {file_name} as {filename}...")
         # Check if the directory exists
         pathlib.Path(
@@ -166,10 +167,9 @@ def fetch_file_content(
             "Failed to load GitHub token. Please register a token first.")
         return
 
-    # Fetch the file content
+    # Fetch the file info
     BASE_ENDPOINT = "https://api.github.com"
     try:
-        # Fetch the file content
         headers = {
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
@@ -188,12 +188,12 @@ def fetch_file_content(
 
     # Save the file content
     download_url = file_info["download_url"]
-    file_name = os.path.basename(file_path)
+    file_name = os.path.basename(file_path)  # 获取文件名（包括扩展名）
+    file_name_without_ext = os.path.splitext(file_name)[0]  # 获取不带扩展名的文件名
     file_content = requests.get(download_url).text
 
     # Rename the file with the naming rules for vulnerable files
-    filename = f"{cve_number}_{repo}_{file_name}_vulnerable{
-        pathlib.Path(file_path).suffix.lower()}"
+    filename = f"{cve_number}_{repo}_vulnerable_{file_name}"
     logger.info(f"Saving file {file_name} as {filename}...")
 
     # Check if the directory exists

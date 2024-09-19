@@ -7,7 +7,14 @@ from security import save_env_var, load_env_var
 from tqdm import tqdm
 from nvd_api import fetch_data_with_CVE_number
 from time import sleep
+from enum import Enum
 import sys
+
+
+class Mode(Enum):
+    append = 'append'
+    cover = 'cover'
+    reset = 'reset'
 
 
 class App(object):
@@ -17,9 +24,26 @@ class App(object):
     def __init__(self):
         logger.info("Initializing the application")
 
-    def fetch(self, csv_path: pathlib.Path):
-        """ Main function to fetch the data from the remote API and save it to ./data."""
+    def fetch(self, csv_path: pathlib.Path, mode: Mode.append):
+        """ Main function to fetch the data from the remote API and save it to ./data.
+        mode:
+        append: Append the data to the existing data. Skipping existed data.
+        cover: Overwrite the existing data.
+        reset: Remove all the existing data and re-fetch all data only from input json.
+
+        default: append
+        """
+
+        # Check if the mode legal
+        try:
+            mode = Mode(mode)
+        except ValueError:
+            logger.exception(f"Invalid mode: {mode}. You must assign a valid mode: {
+                ', '.join([m.value for m in Mode])}")
+            return
+
         logger.info(f"Fetching data from {csv_path}")
+        # TODO: Filter with mode
         with open(csv_path, "r") as f:
             cve_numbers = f.readlines()
         with tqdm(total=len(cve_numbers), desc="Processing CVEs") as pbar:

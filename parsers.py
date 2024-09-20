@@ -22,6 +22,13 @@ register_parser("linux")(linux_parser)
 ffmpeg_parser = BaseParser("ffmpeg", "FFmpeg", "FFmpeg", [
                            r'http:\/\/git\.videolan\.org\/\?p=ffmpeg\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}'])
 register_parser("ffmpeg")(ffmpeg_parser)
+freetype2_parser = BaseParser("freetype2", "freetype", "freetype", [
+                              r'http:\/\/git\.savannah\.gnu\.org\/cgit\/freetype\/freetype2\.git\/commit\/\?id=[a-fA-F0-9]{40}'])
+register_parser("freetype2")(freetype2_parser)
+openssl_parser = BaseParser("openssl", "openssl", "openssl", [
+                            r'http:\/\/git\.openssl\.org\/gitweb\/\?p=openssl\.git;a=commit;h=[a-f0-9]{40}'])
+register_parser("openssl")(openssl_parser)
+
 
 
 def use_all_parsers(url):

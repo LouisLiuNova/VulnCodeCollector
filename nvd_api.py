@@ -27,7 +27,7 @@ def fetch_data_with_CVE_number(cve_number: str):
     Returns:
     status: bool: True if the data is fetched successfully, False otherwise.
     """
-
+    global CVEs_with_GitHub
     # Receive and check input parameter
     cve_number = cve_number.upper()
     logger.info(f"Fetching data for {cve_number}")
@@ -166,6 +166,9 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
                             cve_number}: {ref_url['url']}")
                 if ref_url["url"] not in references["GitHub"]:
                     references["GitHub"].append(ref_url["url"])
+
+                # If the URL is a GitHub URL, we will not use parsers to validate it.
+                continue
 
             # Use parsers to validate and convert the URL
             process_url(ref_url["url"])

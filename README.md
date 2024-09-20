@@ -94,3 +94,16 @@ TBD
 
 1. Linux kernel git
 2. QEMU git
+3. FFmpeg
+
+## 添加自定义parser的方法
+
+在`parsers.py`中创建一个`BaseParser`对象，并填入**所有合法**的regex pattern，随后调用`register_parser`手动注册。示例如下：
+
+```python
+linux_parser = BaseParser("linux", "torvalds", "linux", [
+                          r'http:\/\/git\.kernel\.org\/cgit\/linux\/kernel\/git\/torvalds\/linux\.git\/commit\/\?id=[0-9a-f]{40}', r'http:\/\/git\.kernel\.org\/\?p=linux\/kernel\/git\/torvalds\/linux-2\.6\.git;a=commit;h=[0-9a-f]{40}'])
+register_parser("linux")(linux_parser)
+```
+
+> [!tip]目前支持的URL先决条件：最后应当以`xx=[commit SHA]`结尾。如果需要添加其他类型的pattern，应当在`BaseParser`基础上重写`parse`方法，并添加注册用装饰器`@register_parser(name='ParserTwo')`。

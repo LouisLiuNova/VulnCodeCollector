@@ -12,6 +12,7 @@ import os
 import base64
 from time import sleep
 from urllib.parse import unquote
+from parsers import use_all_parsers
 
 
 def fetch_data_with_CVE_number(cve_number: str):
@@ -131,6 +132,15 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
     # Dump references data
     # NOTE: the field "references" is a dict, the key is the tag and the value is a list of URLs in this tag. Some URLs may belong to multiple tags so they may appear in multiple tags.
     references = defaultdict(list)
+
+    def process_url(url):
+        """
+        To validate if url matches a parser and add it to the references.
+        """
+        parse_res = use_all_parsers(url)
+        if parse_res and parse_res not in references["GitHub"]:
+            references["GitHub"].append(parse_res)
+
     if "references" in vuln_info:
         for ref_url in vuln_info["references"]:
             # Each ref_url is a dict with keys "tags" and "url" like ref_url={'url': 'http://lists.fedoraproject.org/pipermail/package-announce/2016-May/184209.html', 'source': 'secalert@redhat.com', 'tags': ['Third Party Advisory']}
@@ -156,35 +166,8 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
                 if ref_url["url"] not in references["GitHub"]:
                     references["GitHub"].append(ref_url["url"])
 
-            # To validate if the URL is a QEMU git commit. See #6
-            if validate_a_url_belongs_to_QEMU(ref_url["url"]):
-                logger.info(f"Found a QEMU commit URL for {
-                            cve_number}: {ref_url['url']}. We may convert this to GitHub URL.")
-                # Convert this commit to GitHub URL
-                converted_url = convert_QEMU_git_commit_to_GitHub_commit(
-                    ref_url["url"])
-                if converted_url not in references["GitHub"]:
-                    references["GitHub"].append(converted_url)
-
-            # To validate if the URL is a Linux kernel git commit. See #2
-            if validate_a_url_belongs_to_linux_kernel(ref_url["url"]):
-                logger.info(f"Found a Linux kernel commit URL for {
-                            cve_number}: {ref_url['url']}. We may convert this to GitHub URL.")
-                # Convert this commit to GitHub URL
-                converted_url = convert_linux_git_commit_to_GitHub_commit(
-                    ref_url["url"])  # To prevent a wrong URL format
-                if converted_url and converted_url not in references["GitHub"]:
-                    references["GitHub"].append(converted_url)
-
-            # To validate if the URL is a FFmpeg git commit. See #8
-            if validata_a_url_belongs_to_ffmpeg(ref_url["url"]):
-                logger.info(f"Found a FFmpeg commit URL for {
-                            cve_number}: {ref_url['url']}. We may convert this to GitHub URL.")
-                # Convert this commit to GitHub URL
-                converted_url = convert_ffmpeg_git_commit_to_GitHub_commit(
-                    ref_url["url"])  # To prevent a wrong URL format
-                if converted_url and converted_url not in references["GitHub"]:
-                    references["GitHub"].append(converted_url)
+            # Use parsers to validate and convert the URL
+            process_url(ref_url["url"])
     logger.debug(f"{info=}")
     info["references"] = references
 

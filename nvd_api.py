@@ -143,23 +143,28 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
             # TODO: if the URL does not belong to the vendor fetched from the openCVE, we will ignore it. For why we need to do this, refer to CVE-2015-3885 in NVD.
             # NOTE: to fix those URLs without tags, we will add them to a tag named "NoTag".
             for tag in tags:
-                references[tag].append(ref_url["url"])
+                if ref_url["url"] not in references[tag]:  # NOTE: to prevent duplicate URLs
+                    references[tag].append(ref_url["url"])
             if tags == []:
-                references["NoTag"].append(ref_url["url"])
+                if ref_url["url"] not in references["NoTag"]:  # NOTE: to prevent duplicate URLs
+                    references["NoTag"].append(ref_url["url"])
 
             # To validate if the URL is a GitHub commit. If so, we will regard it as a patch commit and relove it later and fetch the source code from the GitHub API.
             if validate_a_url_belongs_to_github(ref_url["url"]):
                 logger.info(f"Found a GitHub commit URL for {
                             cve_number}: {ref_url['url']}")
-                references["GitHub"].append(ref_url["url"])
+                if ref_url["url"] not in references["GitHub"]:
+                    references["GitHub"].append(ref_url["url"])
 
             # To validate if the URL is a QEMU git commit. See #6
             if validate_a_url_belongs_to_QEMU(ref_url["url"]):
                 logger.info(f"Found a QEMU commit URL for {
                             cve_number}: {ref_url['url']}. We may convert this to GitHub URL.")
                 # Convert this commit to GitHub URL
-                references["GitHub"].append(
-                    convert_QEMU_git_commit_to_GitHub_commit(ref_url["url"]))
+                converted_url = convert_QEMU_git_commit_to_GitHub_commit(
+                    ref_url["url"])
+                if converted_url not in references["GitHub"]:
+                    references["GitHub"].append(converted_url)
     logger.debug(f"{info=}")
     info["references"] = references
 

@@ -85,6 +85,12 @@ TBD
 ## TODO
 
 - [x] 添加对OpenCVE的API支持
-- [ ] 添加对Linux kernel git的支持 (issue #2)
+- [x] 添加对Linux kernel git的支持 (issue #2)
+- [ ] 支持简便添加指向GitHub commit的URL解析
 - [ ] 导出数据为兼容腾讯文档/飞书格式的csv文件方便阅览和共享
 - [ ] 调用大模型对commit进行分析，确定出现漏洞的文件
+
+## 目前支持的重定向URL
+
+1. Linux kernel git
+2. QEMU git

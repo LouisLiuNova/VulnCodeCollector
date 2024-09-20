@@ -14,6 +14,8 @@ from time import sleep
 from urllib.parse import unquote
 from parsers import use_all_parsers
 
+CVEs_with_GitHub = 0  # Total number of CVEs with GitHub commit URL
+
 
 def fetch_data_with_CVE_number(cve_number: str):
     """
@@ -66,14 +68,13 @@ def fetch_data_with_CVE_number(cve_number: str):
             githubURLs.append(commit_url)
     if githubURLs == []:
         # No GitHub commit URL found
-        # TODO: Add support for linux kernel patch
         logger.warning(f"No GitHub commit URL found for {
                        cve_number}. End fetching.")
         return True
 
     # Fetch source code from GitHub API
     logger.debug(f"GitHub commit URLs: {githubURLs}")
-    # TODO: The GitHub API is not implemented yet.
+    CVEs_with_GitHub += 1
     # Curl example command: curl -L -H "Accept: application/vnd.github+json"  -H "Authorization: Bearer <token>" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/LibRaw/LibRaw/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d
     for commit_url in githubURLs:
         fetch_patch_source_code(cve_number, commit_url)

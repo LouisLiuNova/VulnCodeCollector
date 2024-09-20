@@ -5,7 +5,7 @@ from loguru import logger
 import fire
 from security import save_env_var, load_env_var
 from tqdm import tqdm
-from nvd_api import fetch_data_with_CVE_number
+from nvd_api import fetch_data_with_CVE_number, CVEs_with_GitHub
 from time import sleep
 from enum import Enum
 import sys
@@ -52,7 +52,8 @@ class App(object):
                 pbar.update(1)
                 # NOTE: follow the best practice of API rate limiting here: https://nvd.nist.gov/developers/start-here
                 sleep(3)
-        logger.info(f"Successfully fetched all data from {csv_path}")
+        logger.info(f"Successfully fetched all data from {csv_path}. {CVEs_with_GitHub}/{
+                    len(cve_numbers)} CVEs have vaild source code.")
 
     def export(self, output_path: pathlib.Path):
         """ Main function to export the data to the remote API."""

@@ -106,4 +106,5 @@ linux_parser = BaseParser("linux", "torvalds", "linux", [
 register_parser("linux")(linux_parser)
 ```
 
-> [!tip]目前支持的URL先决条件：最后应当以`xx=[commit SHA]`结尾。如果需要添加其他类型的pattern，应当在`BaseParser`基础上重写`parse`方法，并添加注册用装饰器`@register_parser(name='ParserTwo')`。
+> [!tip]
+> 目前支持的URL先决条件：最后应当以`xx=[commit SHA]`结尾。如果需要添加其他类型的pattern，应当在`BaseParser`基础上重写`parse`方法，并添加注册用装饰器`@register_parser(name='ParserTwo')`。

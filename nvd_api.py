@@ -145,6 +145,8 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
                 logger.info(f"Found a GitHub commit URL for {
                             cve_number}: {ref_url['url']}")
                 references["GitHub"].append(ref_url["url"])
+            # To validate if the URL is a QEMU git commit. See #6
+            # TODO
     logger.debug(f"{info=}")
     info["references"] = references
 
@@ -259,13 +261,33 @@ def resolve_vendor(vendor_infos: list) -> dict:
     for vendor in vendor_infos:
         if "$PRODUCT$" in vendor:
             vendor, product = vendor.split("$PRODUCT$")
-            if vendor in vendor_infos and product not in result[vendor]:
+            if vendor in result and product not in result[vendor]:
                 result[vendor].append(product)
-            elif vendor not in vendor_infos:
+            elif vendor not in result:
                 result[vendor] = [product]
             else:
                 pass  # 重复的vendor
         else:
-            result[vendor] = [vendor]
+            if vendor not in result:
+                result[vendor] = [vendor]
+            elif vendor in result[vendor]:
+                pass
+            else:
+                result[vendor].append(vendor)
 
     return result
+
+
+def validate_a_url_belongs_to_QEMU(url: str):
+    """
+    Validate a URL belongs to QEMU git commit like http://git.qemu-project.org/?p=qemu.git;a=commit;h=df8bf7a7fe75eb5d5caffa55f5cd4292b757aea6 .
+
+    Args:
+    url: str: The URL to validate.
+
+    Returns:
+    bool: True if the URL belongs to QEMU, False otherwise.
+    """
+    # QEMU commit URL 的正则表达式
+    pattern = r'^http://git\.qemu-project\.org/\?p=qemu\.git;a=commit;h=[0-9a-f]{40}$'
+    return re.match(pattern, url) is not None

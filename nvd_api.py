@@ -176,6 +176,15 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
                 if converted_url and converted_url not in references["GitHub"]:
                     references["GitHub"].append(converted_url)
 
+            # To validate if the URL is a FFmpeg git commit. See #8
+            if validata_a_url_belongs_to_ffmpeg(ref_url["url"]):
+                logger.info(f"Found a FFmpeg commit URL for {
+                            cve_number}: {ref_url['url']}. We may convert this to GitHub URL.")
+                # Convert this commit to GitHub URL
+                converted_url = convert_ffmpeg_git_commit_to_GitHub_commit(
+                    ref_url["url"])  # To prevent a wrong URL format
+                if converted_url and converted_url not in references["GitHub"]:
+                    references["GitHub"].append(converted_url)
     logger.debug(f"{info=}")
     info["references"] = references
 
@@ -378,3 +387,39 @@ def convert_linux_git_commit_to_GitHub_commit(url: str) -> str:
         logger.warning(f"Invalid Linux kernel git commit URL: {decoded_url}")
         return None
     return f"https://github.com/torvalds/linux/commit/{commit_sha}"
+
+
+def validata_a_url_belongs_to_ffmpeg(url: str):
+    """
+    Validate a URL belongs to FFmpeg git commit like http://git.videolan.org/?p=ffmpeg.git%3Ba=commit%3Bh=ae21776207e8a2bbe268e7c9e203f7599dd87ddb
+
+    Args:
+    url: str: The URL to validate.
+
+    Returns:
+    bool: True if the URL belongs to FFmpeg, False otherwise.
+    """
+    pattern = r'http:\/\/git\.videolan\.org\/\?p=ffmpeg\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}'
+    decoded_url = unquote(url)
+    logger.debug(f"{decoded_url=} matching result: {re.match(pattern, decoded_url)
+                                                    is not None}")
+    return re.match(pattern, decoded_url) is not None
+
+
+def convert_ffmpeg_git_commit_to_GitHub_commit(url: str) -> str:
+    """
+    Convert a FFmpeg git commit URL to GitHub commit URL.
+
+    Args:
+    url: str: The FFmpeg git commit URL to convert: http://git.videolan.org/?p=ffmpeg.git%3Ba=commit%3Bh=ae21776207e8a2bbe268e7c9e203f7599dd87ddb
+    Returns:
+    str: The converted GitHub commit URL.
+    """
+    pattern = r'http:\/\/git\.videolan\.org\/\?p=ffmpeg\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}'
+    decoded_url = unquote(url)
+    if re.match(pattern, decoded_url):
+        commit_sha = decoded_url.split("h=")[1]
+    else:
+        logger.warning(f"Invalid FFmpeg git commit URL: {decoded_url}")
+        return None
+    return f"https://github.com/FFmpeg/FFmpeg/commit/{commit_sha}"

@@ -52,8 +52,7 @@ class App(object):
                 pbar.update(1)
                 # NOTE: follow the best practice of API rate limiting here: https://nvd.nist.gov/developers/start-here
                 sleep(3)
-        logger.info(f"Successfully fetched all data from {csv_path}. {CVEs_with_GitHub}/{
-                    len(cve_numbers)} CVEs have vaild source code.")
+        logger.info(f"Successfully fetched all data from {csv_path}.")
 
     def export(self, output_path: pathlib.Path):
         """ Main function to export the data to the remote API."""

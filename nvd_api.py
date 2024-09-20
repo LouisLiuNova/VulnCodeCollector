@@ -11,6 +11,7 @@ from security import load_env_var
 import os
 import base64
 from time import sleep
+from urllib.parse import unquote
 
 
 def fetch_data_with_CVE_number(cve_number: str):
@@ -132,19 +133,26 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
     references = defaultdict(list)
     if "references" in vuln_info:
         for ref_url in vuln_info["references"]:
+            # Each ref_url is a dict with keys "tags" and "url" like ref_url={'url': 'http://lists.fedoraproject.org/pipermail/package-announce/2016-May/184209.html', 'source': 'secalert@redhat.com', 'tags': ['Third Party Advisory']}
+            logger.debug(f"{ref_url=}")
             if "tags" in ref_url:
                 tags = ref_url["tags"]
             else:
                 tags = list()
             # NOTE: for those URLs without tags, we will ignore them except it is a GitHub URL.
             # TODO: if the URL does not belong to the vendor fetched from the openCVE, we will ignore it. For why we need to do this, refer to CVE-2015-3885 in NVD.
+            # NOTE: to fix those URLs without tags, we will add them to a tag named "NoTag".
             for tag in tags:
                 references[tag].append(ref_url["url"])
+            if tags == []:
+                references["NoTag"].append(ref_url["url"])
+
             # To validate if the URL is a GitHub commit. If so, we will regard it as a patch commit and relove it later and fetch the source code from the GitHub API.
             if validate_a_url_belongs_to_github(ref_url["url"]):
                 logger.info(f"Found a GitHub commit URL for {
                             cve_number}: {ref_url['url']}")
                 references["GitHub"].append(ref_url["url"])
+
             # To validate if the URL is a QEMU git commit. See #6
             if validate_a_url_belongs_to_QEMU(ref_url["url"]):
                 logger.info(f"Found a QEMU commit URL for {
@@ -285,7 +293,7 @@ def resolve_vendor(vendor_infos: list) -> dict:
 
 def validate_a_url_belongs_to_QEMU(url: str):
     """
-    Validate a URL belongs to QEMU git commit like http://git.qemu-project.org/?p=qemu.git;a=commit;h=df8bf7a7fe75eb5d5caffa55f5cd4292b757aea6 .
+    Validate a URL belongs to QEMU git commit like http://git.qemu-project.org/?p=qemu.git%3Ba=commit%3Bh=d9a3b33d2c9f996537b7f1d0246dee2d0120cefb or http://git.qemu.org/?p=qemu.git%3Ba=commit%3Bh=3a15cc0e1ee7168db0782133d2607a6bfa422d66 .
 
     Args:
     url: str: The URL to validate.
@@ -294,8 +302,12 @@ def validate_a_url_belongs_to_QEMU(url: str):
     bool: True if the URL belongs to QEMU, False otherwise.
     """
     # QEMU commit URL 的正则表达式
-    pattern = r'^http://git\.qemu-project\.org/\?p=qemu\.git;a=commit;h=[0-9a-f]{40}$'
-    return re.match(pattern, url) is not None
+    pattern1 = r"http:\/\/git\.qemu-project\.org\/\?p=qemu\.git;a=commit;h=[a-f0-9]{40}"
+    pattern2 = r'http:\/\/git\.qemu\.org/\?p=qemu\.git;a=commit;h=[0-9a-f]{40}$'
+    decoded_url = unquote(url)
+    logger.debug(f"{decoded_url=} matching result: {re.match(pattern1, decoded_url)
+                                                    is not None or re.match(pattern2, decoded_url) is not None}")
+    return re.match(pattern1, decoded_url) is not None or re.match(pattern2, decoded_url) is not None
 
 
 def convert_QEMU_git_commit_to_GitHub_commit(url: str) -> str:
@@ -303,8 +315,7 @@ def convert_QEMU_git_commit_to_GitHub_commit(url: str) -> str:
     Convert a QEMU git commit URL to GitHub commit URL.
 
     Args:
-    url: str: The QEMU git commit URL to convert: http://git.qemu-project.org/?p=qemu.git%3Ba=commit%3Bh=d9a3b33d2c9f996537b7f1d0246dee2d0120cefb
-
+    url: str: The QEMU git commit URL to convert: http://git.qemu-project.org/?p=qemu.git%3Ba=commit%3Bh=d9a3b33d2c9f996537b7f1d0246dee2d0120cefb or http://git.qemu.org/?p=qemu.git%3Ba=commit%3Bh=3a15cc0e1ee7168db0782133d2607a6bfa422d66
     Returns:
     str: The converted GitHub commit URL.
     """

@@ -165,6 +165,17 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
                     ref_url["url"])
                 if converted_url not in references["GitHub"]:
                     references["GitHub"].append(converted_url)
+
+            # To validate if the URL is a Linux kernel git commit. See #2
+            if validate_a_url_belongs_to_linux_kernel(ref_url["url"]):
+                logger.info(f"Found a Linux kernel commit URL for {
+                            cve_number}: {ref_url['url']}. We may convert this to GitHub URL.")
+                # Convert this commit to GitHub URL
+                converted_url = convert_linux_git_commit_to_GitHub_commit(
+                    ref_url["url"])  # To prevent a wrong URL format
+                if converted_url and converted_url not in references["GitHub"]:
+                    references["GitHub"].append(converted_url)
+
     logger.debug(f"{info=}")
     info["references"] = references
 
@@ -327,3 +338,43 @@ def convert_QEMU_git_commit_to_GitHub_commit(url: str) -> str:
     # 从URL中提取commit哈希值
     commit_sha = url.split("h=")[1]
     return f"https://github.com/qemu/qemu/commit/{commit_sha}"
+
+
+def validate_a_url_belongs_to_linux_kernel(url: str):
+    """
+    Validate a URL belongs to Linux kernel git commit like http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=f7068114d45ec55996b9040e98111afa56e010fe or http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git%3Ba=commit%3Bh=c2c65cd2e14ada6de44cb527e7f1990bede24e15
+
+    Args:
+    url: str: The URL to validate.
+
+    Returns:
+    bool: True if the URL belongs to Linux kernel, False otherwise.
+    """
+    pattern1 = r'http:\/\/git\.kernel\.org\/cgit\/linux\/kernel\/git\/torvalds\/linux\.git\/commit\/\?id=[0-9a-f]{40}'
+    pattern2 = r'http:\/\/git\.kernel\.org\/\?p=linux\/kernel\/git\/torvalds\/linux-2\.6\.git;a=commit;h=[0-9a-f]{40}'
+    decoded_url = unquote(url)
+    logger.debug(f"{decoded_url=} matching result: {re.match(pattern1, decoded_url)
+                                                    is not None or re.match(pattern2, decoded_url) is not None}")
+    return re.match(pattern1, decoded_url) is not None or re.match(pattern2, decoded_url) is not None
+
+
+def convert_linux_git_commit_to_GitHub_commit(url: str) -> str:
+    """
+    Convert a Linux kernel git commit URL to GitHub commit URL.
+
+    Args:
+    url: str: The Linux kernel git commit URL to convert: http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=f7068114d45ec55996b9040e98111afa56e010fe or http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git%3Ba=commit%3Bh=c2c65cd2e14ada6de44cb527e7f1990bede24e15
+    Returns:
+    str: The converted GitHub commit URL.
+    """
+    pattern1 = r'http:\/\/git\.kernel\.org\/cgit\/linux\/kernel\/git\/torvalds\/linux\.git\/commit\/\?id=[0-9a-f]{40}'
+    pattern2 = r'http:\/\/git\.kernel\.org\/\?p=linux\/kernel\/git\/torvalds\/linux-2\.6\.git;a=commit;h=[0-9a-f]{40}'
+    decoded_url = unquote(url)
+    if re.match(pattern1, decoded_url):
+        commit_sha = decoded_url.split("id=")[1]
+    elif re.match(pattern2, decoded_url):
+        commit_sha = decoded_url.split("h=")[1]
+    else:
+        logger.warning(f"Invalid Linux kernel git commit URL: {decoded_url}")
+        return None
+    return f"https://github.com/torvalds/linux/commit/{commit_sha}"

@@ -146,7 +146,12 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
                             cve_number}: {ref_url['url']}")
                 references["GitHub"].append(ref_url["url"])
             # To validate if the URL is a QEMU git commit. See #6
-            # TODO
+            if validate_a_url_belongs_to_QEMU(ref_url["url"]):
+                logger.info(f"Found a QEMU commit URL for {
+                            cve_number}: {ref_url['url']}. We may convert this to GitHub URL.")
+                # Convert this commit to GitHub URL
+                references["GitHub"].append(
+                    convert_QEMU_git_commit_to_GitHub_commit(ref_url["url"]))
     logger.debug(f"{info=}")
     info["references"] = references
 
@@ -291,3 +296,18 @@ def validate_a_url_belongs_to_QEMU(url: str):
     # QEMU commit URL 的正则表达式
     pattern = r'^http://git\.qemu-project\.org/\?p=qemu\.git;a=commit;h=[0-9a-f]{40}$'
     return re.match(pattern, url) is not None
+
+
+def convert_QEMU_git_commit_to_GitHub_commit(url: str) -> str:
+    """
+    Convert a QEMU git commit URL to GitHub commit URL.
+
+    Args:
+    url: str: The QEMU git commit URL to convert: http://git.qemu-project.org/?p=qemu.git%3Ba=commit%3Bh=d9a3b33d2c9f996537b7f1d0246dee2d0120cefb
+
+    Returns:
+    str: The converted GitHub commit URL.
+    """
+    # 从URL中提取commit哈希值
+    commit_sha = url.split("h=")[1]
+    return f"https://github.com/qemu/qemu/commit/{commit_sha}"

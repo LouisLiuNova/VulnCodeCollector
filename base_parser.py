@@ -1,5 +1,6 @@
 """
 Base class of all URL parsers."""
+
 import re
 from loguru import logger
 from urllib.parse import unquote
@@ -40,12 +41,12 @@ class BaseParser:
 
         # NOTE: the base class only implements pattern like http://git.savannah.gnu.org/cgit/freetype/freetype2.git/commit/?id=59eb9f8cfe7d1df379a2318316d1f04f80fba54a (can be split by =)
         try:
-            commit_sha = url.split('=')[-1]
+            commit_sha = url.split("=")[-1]
         except:
             logger.warning(f"Cannot parse URL {url} to get commit SHA.")
             return None
 
-        return f"http://github.com/{self.owner}/{self.repo}/commit/{commit_sha}"
+        return f"https://github.com/{self.owner}/{self.repo}/commit/{commit_sha}"
 
     def validate(self, url: str) -> bool:
         """
@@ -62,6 +63,5 @@ class BaseParser:
             if re.match(p, decoded_url):
                 logger.debug(f"URL {decoded_url} matched pattern {p}")
                 return True
-        logger.debug(
-            f"URL {decoded_url} did not match any pattern in {self.name}")
+        logger.debug(f"URL {decoded_url} did not match any pattern in {self.name}")
         return False

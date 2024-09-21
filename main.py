@@ -8,6 +8,7 @@ from tqdm import tqdm
 from nvd_api import fetch_data_with_CVE_number, CVEs_with_GitHub
 from time import sleep
 from enum import Enum
+from stats import stat
 import sys
 
 
@@ -59,6 +60,10 @@ class App(object):
         logger.info(f"Exporting data to {output_path}")
         logger.exception("Export function not implemented yet")
         raise NotImplementedError("Export function not implemented yet")
+
+    def stat(self):
+        """ Main function to show the statistics of the data."""
+        stat()
 
     def hello(self):
         logger.info("Hello, World!")

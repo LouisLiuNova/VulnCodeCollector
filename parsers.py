@@ -14,7 +14,7 @@ def register_parser(name):
 
 
 qemu_parser = BaseParser("qemu", "qemu", "qemu", [
-                         r"http:\/\/git\.qemu-project\.org\/\?p=qemu\.git;a=commit;h=[a-f0-9]{40}", r'http:\/\/git\.qemu\.org/\?p=qemu\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}$'])
+                         r"http:\/\/git\.qemu-project\.org\/\?p=qemu\.git;a=(?:commit|commitdiff);h=[a-f0-9]{40}", r'http:\/\/git\.qemu\.org/\?p=qemu\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}$'])
 register_parser("qemu")(qemu_parser)
 linux_parser = BaseParser("linux", "torvalds", "linux", [
                           r'http:\/\/git\.kernel\.org\/cgit\/linux\/kernel\/git\/torvalds\/linux\.git\/commit\/\?id=[0-9a-f]{40}', r'http:\/\/git\.kernel\.org\/\?p=linux\/kernel\/git\/torvalds\/linux-2\.6\.git;a=commit;h=[0-9a-f]{40}'])

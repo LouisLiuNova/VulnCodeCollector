@@ -17,7 +17,7 @@ qemu_parser = BaseParser("qemu", "qemu", "qemu", [
                          r"https?:\/\/git\.qemu-project\.org\/\?p=qemu\.git;a=(?:commit|commitdiff);h=[a-f0-9]{40}", r'https?:\/\/git\.qemu\.org/\?p=qemu\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}$'])
 register_parser("qemu")(qemu_parser)
 linux_parser = BaseParser("linux", "torvalds", "linux", [
-                          r'https?:\/\/git\.kernel\.org\/cgit\/linux\/kernel\/git\/torvalds\/linux\.git\/commit\/\?id=[0-9a-f]{40}', r'https?:\/\/git\.kernel\.org\/\?p=linux\/kernel\/git\/torvalds\/linux-2\.6\.git;a=commit;h=[0-9a-f]{40}'])
+                          r'https?:\/\/git\.kernel\.org\/cgit\/linux\/kernel\/git\/torvalds\/linux\.git\/commit\/\?id=[0-9a-f]{40}', r'https?:\/\/git\.kernel\.org\/\?p=linux\/kernel\/git\/torvalds\/linux-2\.6\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}'])
 register_parser("linux")(linux_parser)
 ffmpeg_parser = BaseParser("ffmpeg", "FFmpeg", "FFmpeg", [
                            r'https?:\/\/git\.videolan\.org\/\?p=ffmpeg\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}'])

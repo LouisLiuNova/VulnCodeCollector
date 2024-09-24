@@ -14,7 +14,7 @@ def register_parser(name):
 
 
 qemu_parser = BaseParser("qemu", "qemu", "qemu", [
-                         r"http:\/\/git\.qemu-project\.org\/\?p=qemu\.git;a=commit;h=[a-f0-9]{40}", r'http:\/\/git\.qemu\.org/\?p=qemu\.git;a=commit;h=[0-9a-f]{40}$'])
+                         r"http:\/\/git\.qemu-project\.org\/\?p=qemu\.git;a=commit;h=[a-f0-9]{40}", r'http:\/\/git\.qemu\.org/\?p=qemu\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}$'])
 register_parser("qemu")(qemu_parser)
 linux_parser = BaseParser("linux", "torvalds", "linux", [
                           r'http:\/\/git\.kernel\.org\/cgit\/linux\/kernel\/git\/torvalds\/linux\.git\/commit\/\?id=[0-9a-f]{40}', r'http:\/\/git\.kernel\.org\/\?p=linux\/kernel\/git\/torvalds\/linux-2\.6\.git;a=commit;h=[0-9a-f]{40}'])
@@ -26,9 +26,8 @@ freetype2_parser = BaseParser("freetype2", "freetype", "freetype", [
                               r'http:\/\/git\.savannah\.gnu\.org\/cgit\/freetype\/freetype2\.git\/commit\/\?id=[a-fA-F0-9]{40}'])
 register_parser("freetype2")(freetype2_parser)
 openssl_parser = BaseParser("openssl", "openssl", "openssl", [
-                            r'http:\/\/git\.openssl\.org\/gitweb\/\?p=openssl\.git;a=commit;h=[a-f0-9]{40}'])
+                            r'http:\/\/git\.openssl\.org\/gitweb\/\?p=openssl\.git;a=(?:commit|commitdiff);h=[a-f0-9]{40}'])
 register_parser("openssl")(openssl_parser)
-
 
 
 def use_all_parsers(url):

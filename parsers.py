@@ -20,7 +20,7 @@ linux_parser = BaseParser("linux", "torvalds", "linux", [
                           r'https?:\/\/git\.kernel\.org\/cgit\/linux\/kernel\/git\/torvalds\/linux\.git\/commit\/\?id=[0-9a-f]{40}', r'https?:\/\/git\.kernel\.org\/\?p=linux\/kernel\/git\/torvalds\/linux-2\.6\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}'])
 register_parser("linux")(linux_parser)
 ffmpeg_parser = BaseParser("ffmpeg", "FFmpeg", "FFmpeg", [
-                           r'https?:\/\/git\.videolan\.org\/\?p=ffmpeg\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}'])
+                           r'https?:\/\/git\.videolan\.org\/\?p=ffmpeg\.git;a=(?:commit|commitdiff);h=[0-9a-f]{40}', r'http:\/\/git\.videolan\.org\/gitweb\.cgi\/ffmpeg\.git\/\?a=commit(;h=[a-f0-9]{40})?'])
 register_parser("ffmpeg")(ffmpeg_parser)
 freetype2_parser = BaseParser("freetype2", "freetype", "freetype", [
                               r'https?:\/\/git\.savannah\.gnu\.org\/cgit\/freetype\/freetype2\.git\/commit\/\?id=[a-fA-F0-9]{40}'])

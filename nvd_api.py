@@ -25,7 +25,7 @@ def fetch_data_with_CVE_number(cve_number: str):
     cve_number: str: The CVE number to fetch. Must be a valid CVE string like "CVE-2021-1234" or "cve-2021-1234".
 
     Returns:
-    status: bool: True if the data is fetched successfully, False otherwise.
+    status: bool: True if this CVE has vaild GitHub commit URL, False otherwise.
     """
     global CVEs_with_GitHub
     # Receive and check input parameter
@@ -33,7 +33,7 @@ def fetch_data_with_CVE_number(cve_number: str):
     logger.info(f"Fetching data for {cve_number}")
     if not validate_cve(cve_number):
         logger.warning(f"{cve_number} is not a valid CVE number, skipping")
-        return False
+        return None
 
     nvd_data = fetch_data_with_CVE_number_in_NVD(cve_number)
     sleep(5)
@@ -43,7 +43,7 @@ def fetch_data_with_CVE_number(cve_number: str):
     if nvd_data is None or open_cve_data is None:
         logger.warning(f"Failed to fetch data for {cve_number}: NVD:{
                        nvd_data is not None}, OpenCVE:{open_cve_data is not None}")
-        return False
+        return None
     result = defaultdict(None, nvd_data)
     result["vendor"] = open_cve_data["vendor"]
     result["title"] = open_cve_data["title"]
@@ -70,7 +70,7 @@ def fetch_data_with_CVE_number(cve_number: str):
         # No GitHub commit URL found
         logger.warning(f"No GitHub commit URL found for {
                        cve_number}. End fetching.")
-        return True
+        return False
 
     # Fetch source code from GitHub API
     logger.debug(f"GitHub commit URLs: {githubURLs}")
@@ -78,6 +78,8 @@ def fetch_data_with_CVE_number(cve_number: str):
     # Curl example command: curl -L -H "Accept: application/vnd.github+json"  -H "Authorization: Bearer <token>" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/LibRaw/LibRaw/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d
     for commit_url in githubURLs:
         fetch_patch_source_code(cve_number, commit_url)
+
+    return True
 
 
 def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:

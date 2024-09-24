@@ -47,13 +47,23 @@ class App(object):
         # TODO: Filter with mode
         with open(csv_path, "r") as f:
             cve_numbers = f.readlines()
+
+        failed_cves = []  # To save CVEs without vaild commits
         with tqdm(total=len(cve_numbers), desc="Processing CVEs") as pbar:
             for cve in cve_numbers:
-                fetch_data_with_CVE_number(cve.strip())
+                result = fetch_data_with_CVE_number(cve.strip())
+                if result is None:
+                    logger.warning(f"Failed to fetch data for {cve}")
+                elif result == False:
+                    logger.warning(f"No valid commits found for {cve}")
+                    failed_cves.append(cve)
+                else:
+                    pass
                 pbar.update(1)
                 # NOTE: follow the best practice of API rate limiting here: https://nvd.nist.gov/developers/start-here
                 sleep(3)
-        logger.info(f"Successfully fetched all data from {csv_path}.")
+        logger.info(f"Successfully fetched all data from {
+                    csv_path}. CVEs without valid commits: {failed_cves}")
 
     def export(self, output_path: pathlib.Path):
         """ Main function to export the data to the remote API."""

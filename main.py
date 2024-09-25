@@ -11,12 +11,16 @@ from enum import Enum
 from stats import stat
 import sys
 import utils
+import os
 
 
 class Mode(Enum):
     append = 'append'
     cover = 'cover'
     reset = 'reset'
+
+
+BASE_PATH = "./data"
 
 
 class App(object):
@@ -27,7 +31,7 @@ class App(object):
         logger.info("Initializing the application")
 
     def fetch(self, csv_path: pathlib.Path, mode: Mode.append):
-        """ Main function to fetch the data from the remote API and save it to ./data.
+        """ Main function to fetch the data from the remote API and save it to ./data/[input filename]/.
         mode:
         append: Append the data to the existing data. Skipping existed data if vaild source codes are found(otherwise).
         cover: Overwrite the existing data. EUQAL to reset for now.
@@ -45,6 +49,8 @@ class App(object):
             return
 
         logger.info(f"Fetching data from {csv_path}")
+
+        csv_filename = os.path.splitext(os.path.basename(csv_path))[0]
         # TODO: Filter with mode
         with open(csv_path, "r") as f:
             cve_numbers = f.readlines()
@@ -53,13 +59,13 @@ class App(object):
         with tqdm(total=len(cve_numbers), desc="Processing CVEs") as pbar:
 
             for cve in cve_numbers:
-                if mode == Mode.append and utils.check_directory_and_subdirectory("./data/"+cve.strip()):
+                if mode == Mode.append and utils.check_directory_and_subdirectory(f"./data/{csv_filename}/{cve.strip()}"):
                     logger.info(
                         f"Skipping {cve.strip()} because it has been finished under append mode.")
                     pbar.update(1)
                     continue
 
-                result = fetch_data_with_CVE_number(cve.strip())
+                result = fetch_data_with_CVE_number(cve.strip(), csv_filename)
                 if result is None:
                     logger.warning(f"Failed to fetch data for {cve.strip()}")
                 elif result == False:

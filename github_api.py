@@ -12,7 +12,7 @@ from urllib.parse import urlparse, parse_qs
 import json
 
 
-def fetch_patch_source_code(cve_number: str, commit_url: str):
+def fetch_patch_source_code(cve_number: str, commit_url: str, input_filename: str):
     """
     Fetch the source code of a patch from the GitHub API (https://docs.github.com/zh/rest/commits/commits?apiVersion=2022-11-28#get-a-commit) and save it to .
     Example:
@@ -20,6 +20,7 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
     Args:
     cve_number: str: The CVE number of the patch.
     commit_url: str: The URL of the commit.
+    input_filename: str: The name of the input file.
 
     Returns:
     None
@@ -102,17 +103,21 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
                 file["filename"],
                 info["commit_sha"],
                 info["parent_commit_sha"],
+                input_filename
             )  # Fetch the previous(vulnerable) version of the file
 
             # Save the diff file
             diff_content = file["patch"]
-            filename = f"{cve_number}_{info['repo']}_{file_name}.diff"
+            filename = pathlib.Path(
+                f"{cve_number}_{info['repo']}_{file_name}.diff")
             logger.info(f"Saving diff file {filename}...")
             # Check if the directory exists
-            pathlib.Path(f"data/{cve_number}/{info["commit_sha"]}/patched").mkdir(
+            data_dir = pathlib.Path(
+                f"data/{input_filename}/{cve_number}/{info["commit_sha"]}/patched")
+            data_dir.mkdir(
                 parents=True, exist_ok=True
             )
-            with open(f"data/{cve_number}/{info['commit_sha']}/patched/{filename}", "w") as f:
+            with open(data_dir/filename, "w") as f:
                 f.write(diff_content)
             logger.info(f"Successfully saved diff file {filename}.")
 
@@ -128,25 +133,26 @@ def fetch_patch_source_code(cve_number: str, commit_url: str):
         file_content = requests.get(download_url).text
         file_name_without_ext = os.path.splitext(file_name)[0]  # 获取不带扩展名的文件名
         # Rename the file with the naming rules for vulnerable files
-        filename = f"{cve_number}_{info['repo']}_patched_{
-            os.path.basename(file['filename'])}"
+        filename = pathlib.Path(f"{cve_number}_{info['repo']}_patched_{
+            os.path.basename(file['filename'])}")
         logger.info(f"Saving file {file_name} as {filename}...")
         # Check if the directory exists
-        pathlib.Path(
-            f"data/{cve_number}/{info['commit_sha']}/patched").mkdir(parents=True, exist_ok=True)
-        with open(f"data/{cve_number}/{info['commit_sha']}/patched/{filename}", "w") as f:
+
+        # pathlib.Path(f"data/{cve_number}/{info['commit_sha']}/patched").mkdir(parents=True, exist_ok=True)
+        with open(data_dir/filename, "w") as f:
             f.write(file_content)
         logger.info(f"Successfully saved file {filename}.")
 
         # Save the commit infos
-        with open(f"data/{cve_number}/{info['commit_sha']}/{info['commit_sha']}.json", "w")as f:
+        filename = pathlib.Path(f"{info['commit_sha']}.json")
+        with open(data_dir/filename, "w")as f:
             json.dump(info, f, indent=4)
         logger.info(f"Successfully saved commit info to {
                     info['commit_sha']}.json.")
 
 
 def fetch_file_content(
-        cve_number: str, owner: str, repo: str, file_path: str, commit_sha: str, parent_commit_sha: str):
+        cve_number: str, owner: str, repo: str, file_path: str, commit_sha: str, parent_commit_sha: str, input_filename: str):
     """
     Fetch the content of the given file from the given commit hash and then save it.
     Args:
@@ -156,7 +162,7 @@ def fetch_file_content(
     file_path: str: The path of the file.
     commit_sha: str: The patch commit hash.
     parent_commit_sha: str: The parent_commit hash.
-
+    input_filename: str: The name of the input file.
     Returns:
     None
     """
@@ -193,13 +199,15 @@ def fetch_file_content(
     file_content = requests.get(download_url).text
 
     # Rename the file with the naming rules for vulnerable files
-    filename = f"{cve_number}_{repo}_vulnerable_{file_name}"
+    filename = pathlib.Path(f"{cve_number}_{repo}_vulnerable_{file_name}")
     logger.info(f"Saving file {file_name} as {filename}...")
 
     # Check if the directory exists
-    pathlib.Path(
-        f"data/{cve_number}/{commit_sha}/vulnerable").mkdir(parents=True, exist_ok=True)
-    with open(f"data/{cve_number}/{commit_sha}/vulnerable/{filename}", "w") as f:
+
+    data_dir = pathlib.Path(
+        f"data/{input_filename}/{cve_number}/{commit_sha}/vulnerable")
+    data_dir.mkdir(parents=True, exist_ok=True)
+    with open(data_dir/filename, "w") as f:
         f.write(file_content)
 
     logger.info(f"Successfully saved file {filename}.")

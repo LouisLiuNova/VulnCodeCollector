@@ -17,12 +17,13 @@ from parsers import use_all_parsers
 CVEs_with_GitHub = 0  # Total number of CVEs with GitHub commit URL
 
 
-def fetch_data_with_CVE_number(cve_number: str):
+def fetch_data_with_CVE_number(cve_number: str, input_filename: str):
     """
     Fetch the data from the NVD API and OpenCVE with the given ONE CVE number. If vaild, save the data to `./data/[cve-number]/` and continue to fetch source code from the GitHub API.
 
     Args:
     cve_number: str: The CVE number to fetch. Must be a valid CVE string like "CVE-2021-1234" or "cve-2021-1234".
+    input_filename: str: The input filename to save the data. Must be a valid filename string like "./example/input.csv".
 
     Returns:
     status: bool: True if this CVE has vaild GitHub commit URL, False otherwise.
@@ -50,8 +51,8 @@ def fetch_data_with_CVE_number(cve_number: str):
     result["weaknesses"] = open_cve_data["cwe"]
     # NOTE: More info from OpenCVE can be added here.
 
-    # Save data to `./data/{cve_number}/{cve_number}.json`. If the directory does not exist, create it.
-    data_dir = f"./data/{cve_number}"
+    # Save data to `./data/{input_filename}/{cve_number}/{cve_number}.json`. If the directory does not exist, create it.
+    data_dir = f"./data/{input_filename}/{cve_number}"
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
     with open(f"{data_dir}/{cve_number}.json", "w") as f:
@@ -77,7 +78,7 @@ def fetch_data_with_CVE_number(cve_number: str):
     CVEs_with_GitHub += 1
     # Curl example command: curl -L -H "Accept: application/vnd.github+json"  -H "Authorization: Bearer <token>" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/LibRaw/LibRaw/commits/2f912f5b33582961b1cdbd9fd828589f8b78f21d
     for commit_url in githubURLs:
-        fetch_patch_source_code(cve_number, commit_url)
+        fetch_patch_source_code(cve_number, commit_url, input_filename)
 
     return True
 

@@ -5,6 +5,7 @@ To stat the data and show it in the console
 from prettytable import PrettyTable
 import os
 from loguru import logger
+import pathlib
 
 
 def count_subdirectories(directory):
@@ -22,13 +23,13 @@ def count_subdirectories(directory):
     return subdirectory_info
 
 
-def stat():
+def stat(sub_dir: str):
     """
-    to stat data saved at ./data and print it in a table
+    to stat data saved at ./data/[sub_dir] and print it in a table
     """
 
     table = PrettyTable()
-    data_path = "./data"
+    data_path = pathlib.Path(f"./data/{sub_dir}")
     result = count_subdirectories(data_path)
     CVEs_cnt = len(result)
     commits_cnt = sum(1 for has_subdirs in result.values() if has_subdirs)

@@ -85,9 +85,9 @@ class App(object):
         logger.exception("Export function not implemented yet")
         raise NotImplementedError("Export function not implemented yet")
 
-    def stat(self):
+    def stat(self, sub_dir: str):
         """ Main function to show the statistics of the data."""
-        stat()
+        stat(subdir=sub_dir)
 
     def hello(self):
         logger.info("Hello, World!")

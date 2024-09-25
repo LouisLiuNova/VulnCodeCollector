@@ -26,7 +26,7 @@ freetype2_parser = BaseParser("freetype2", "freetype", "freetype", [
                               r'https?:\/\/git\.savannah\.gnu\.org\/cgit\/freetype\/freetype2\.git\/commit\/\?id=[a-fA-F0-9]{40}'])
 register_parser("freetype2")(freetype2_parser)
 openssl_parser = BaseParser("openssl", "openssl", "openssl", [
-                            r'https?:\/\/git\.openssl\.org\/gitweb\/\?p=openssl\.git;a=(?:commit|commitdiff);h=[a-f0-9]{40}'])
+                            r'https?:\/\/git\.openssl\.org\/gitweb\/\?p=openssl\.git;a=(?:commit|commitdiff);h=[a-f0-9]{40}', r'https?:\/\/git\.openssl\.org\/\?p=openssl\.git;a=commit;h=[a-f0-9]{40}$'])
 register_parser("openssl")(openssl_parser)
 
 

@@ -25,6 +25,7 @@ dependencies:
   - ncurses=6.4=h6a678d5_0
   - openssl=3.3.2=hb9d3cd8_0
   - pip=24.2=py312h06a4308_0
+  - prettytable=3.5.0=py312h06a4308_0
   - pysocks=1.7.1=py312h06a4308_0
   - python=3.12.5=h5148396_1
   - python-dotenv=0.21.0=py312h06a4308_0
@@ -38,6 +39,7 @@ dependencies:
   - tqdm=4.66.5=py312he106c6f_0
   - tzdata=2024a=h04d1e81_0
   - urllib3=2.2.2=py312h06a4308_0
+  - wcwidth=0.2.5=pyhd3eb1b0_0
   - wheel=0.44.0=py312h06a4308_0
   - xz=5.4.6=h5eee18b_1
   - zlib=1.2.13=h5eee18b_1

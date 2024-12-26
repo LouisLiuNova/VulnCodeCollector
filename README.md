@@ -79,7 +79,44 @@ python3 main.py register opencve [username] [password]
 ## Usage
 
 ```shell
-TBD
+Usage:
+    main.py <command> [arguments]
+
+Commands:
+    run fetch <csv_path> [<mode>]  Fetch data from the remote API and save it to ./data/[input filename]/.
+                                  csv_path: Path to the CSV file containing CVE numbers.
+                                  mode: Optional. Mode of operation (default: append).
+                                        - append: Append the data to the existing data, skipping existed data if valid source codes are found.
+                                        - cover: Overwrite the existing data.
+                                        - reset: Remove all the existing data and re-fetch all data only from input CSV.
+
+    run export <output_path>      Export the data to the remote API. (Not implemented yet)
+                                  output_path: Path where the data will be exported.
+
+    run stat <sub_dir>            Show the statistics of the data.
+                                  sub_dir: Sub-directory under ./data/ containing the data to analyze.
+
+    run hello                     Print a greeting message.
+
+    register opencve <username> <password>
+                                  Register credentials for OpenCVE.
+                                  username: Username for OpenCVE API.
+                                  password: Password for OpenCVE API.
+
+    register github <token>       Register credentials for Github.
+                                  token: Personal access token for Github API.
+
+    register nvd <token>          Register credentials for NVD.
+                                  token: API key for NVD API.
+
+Examples:
+    main.py run fetch ./cves.csv append
+    main.py run export ./exported_data.json
+    main.py run stat my_data_subdir
+    main.py run hello
+    main.py register opencve myuser mypassword
+    main.py register github mytoken12345
+    main.py register nvd myapikey67890
 ```
 
 ## TODO
@@ -88,7 +125,7 @@ TBD
 - [x] 添加对Linux kernel git的支持 (issue #2)
 - [ ] 支持简便添加指向GitHub commit的URL解析
 - [ ] 导出数据为兼容腾讯文档/飞书格式的csv文件方便阅览和共享
-- [ ] 调用大模型对commit进行分析，确定出现漏洞的文件
+~~- [ ] 调用大模型对commit进行分析，确定出现漏洞的文件~~
 
 ## 目前支持的重定向URL
 

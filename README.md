@@ -51,9 +51,9 @@ python3 main.py register nvd [yourKey]
 > [!tip]
 > 关于GitHub提供的API更多信息，请参阅[Official Doc](https://docs.github.com/zh/rest?apiVersion=2022-11-28)。本项目的GitHub REST API基于当前最新的版本`2022-11-28`
 
-GitHub的API需要提供[Personal Access Token](https://docs.github.com/zh/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28)进行验证。请参考[Official Doc](https://docs.github.com/zh/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#创建-personal-access-token-classic)生成个人使用的PAT以使用GitHub API。在token的作用域选择上，为保证token的最小权限，不需要选择任何额外的权限，因为本项目只访问公开的repo。
+GitHub的API需要提供[Personal Access Token](https://docs.github.com/zh/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28)进行验证。请参考[Official Doc](https://docs.github.com/zh/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#创建-personal-access-token-classic)生成个人使用的PAT以使用GitHub API（注意选择Tokens(Classic)，在[Dev settings](https://github.com/settings/tokens)）。在token的作用域选择上，为保证token的最小权限，不需要选择任何额外的权限，因为本项目只访问公开的repo。
 
-在获取到PAT后，运行下面的指令注册token到本机的环境变量中。Token将保存在`.env`中。
+在获取到PAT（应当形如`ghp_...`）后，运行下面的指令注册token到本机的环境变量中。Token将保存在`.env`中。
 
 ```shell
 python3 main.py register github [yourPAT]
@@ -67,7 +67,7 @@ python3 main.py register github [yourPAT]
 > [!tip]
 > 关于OpenCVE提供的API更多信息，请参阅[Official Doc](https://docs.opencve.io/api/)
 
-[OpenCVE](https://www.opencve.io/)的API需要通过基于用户名和密码的基本认证。OpenCVE为注册的免费用户提供1000qph的rate limit。在[Official register URL](https://app.opencve.io/signup/)注册账号，并通过类似的方法注册用户名和密码到本机的环境变量中。
+[OpenCVE](https://www.opencve.io/)的API需要通过基于用户名和密码的基本认证。OpenCVE为注册的免费用户提供~~1000qph~~（现在是60qph了）的rate limit。在[Official register URL](https://app.opencve.io/signup/)注册账号，并通过类似的方法注册用户名和密码到本机的环境变量中。
 
 ```shell
 python3 main.py register opencve [username] [password]
@@ -125,6 +125,7 @@ Examples:
 - [x] 添加对Linux kernel git的支持 (issue #2)
 - [ ] 支持简便添加指向GitHub commit的URL解析
 - [ ] 导出数据为兼容腾讯文档/飞书格式的csv文件方便阅览和共享
+
 ~~- [ ] 调用大模型对commit进行分析，确定出现漏洞的文件~~
 
 ## 目前支持的重定向URL
@@ -145,3 +146,6 @@ register_parser("linux")(linux_parser)
 
 > [!tip]
 > 目前支持的URL先决条件：最后应当以`xx=[commit SHA]`结尾。如果需要添加其他类型的pattern，应当在`BaseParser`基础上重写`parse`方法，并添加注册用装饰器`@register_parser(name='ParserTwo')`。
+
+# VulnCodeCollector V2
+在V1的基础上添加了根据项目从NVD API获取指定时间节点之后的所有CVE列表，以及将获取到的数据传入指定mongo的功能。

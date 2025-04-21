@@ -85,7 +85,7 @@ def fetch_data_with_CVE_number(cve_number: str, input_filename: str):
 
 def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
     """
-    Fetch data from NVD API with the given ONE CVE number. Data includes the description, references, and weakness. For the doc of the endpoint, refer https://nvd.nist.gov/developers/vulnerabilities
+    Fetch data from NVD API with the given ONE CVE number. Data includes the description, references, and weakness. For the doc of the endpoint, refer https: // nvd.nist.gov/developers/vulnerabilities
 
     Args:
     cve_number: str: The validated CVE number to fetch. Must be a valid CVE string like "CVE-2021-1234" or "cve-2021-1234".
@@ -183,7 +183,7 @@ def fetch_data_with_CVE_number_in_NVD(cve_number: str) -> dict:
 
 def fetch_data_with_CVE_number_in_OpenCVE(cve_number: str):
     """
-    Fetch data from OpenCVE with the given ONE CvE number. Data includes vendor, product, CWEs. For the doc of the endpoint, refer https://docs.opencve.io/api/cve/
+    Fetch data from OpenCVE with the given ONE CvE number. Data includes vendor, product, CWEs. For the doc of the endpoint, refer https: // docs.opencve.io/api/cve/
 
     Args:
     cve_number: str: The validated CvE number to fetch. Must be a valid CvE string like "CVE-2021-1234" or "cve-2021-1234".
@@ -282,7 +282,7 @@ def resolve_vendor(vendor_infos: list) -> dict:
     dict: The structured vendor info like:
     {
         "qemu": ["qemu"],
-        "redhat": ["enterprise_linux","openstack"]
+        "redhat": ["enterprise_linux", "openstack"]
     }
     """
     result = dict()

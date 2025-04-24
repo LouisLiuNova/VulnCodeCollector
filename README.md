@@ -126,8 +126,6 @@ Examples:
 - [ ] 支持简便添加指向GitHub commit的URL解析
 - [ ] 导出数据为兼容腾讯文档/飞书格式的csv文件方便阅览和共享
 
-~~- [ ] 调用大模型对commit进行分析，确定出现漏洞的文件~~
-
 ## 目前支持的重定向URL
 
 1. Linux kernel git
@@ -149,3 +147,14 @@ register_parser("linux")(linux_parser)
 
 # VulnCodeCollector V2
 在V1的基础上添加了根据项目从NVD API获取指定时间节点之后的所有CVE列表，以及将获取到的数据传入指定mongo的功能。
+
+Step1:获取指定时间节点后的指定产品的CVE列表(需确定产品存在且时间戳正确)
+
+```shell
+python open_cve_fetcher.py --vendor libtiff --product libtiff --begin_time 2017-11-29T00:00:00Z --output_path ./input/
+```
+
+Step2:使用`main.py`爬取信息
+```shell
+TBD
+```

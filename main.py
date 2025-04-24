@@ -30,7 +30,7 @@ class App(object):
     def __init__(self):
         logger.info("Initializing the application")
 
-    def fetch(self, csv_path: pathlib.Path, mode: Mode.append):
+    def fetch(self, csv_path: pathlib.Path, mode: Mode = Mode.append):
         """ Main function to fetch the data from the remote API and save it to ./data/[input filename]/.
         mode:
         append: Append the data to the existing data. Skipping existed data if vaild source codes are found(otherwise).

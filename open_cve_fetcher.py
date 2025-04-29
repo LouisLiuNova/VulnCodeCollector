@@ -101,9 +101,9 @@ def fetch_cve_list_to_csv(vendor: str, product: str, begin_time: str, output_pat
         try:
             data = response.json()
             url = data.get("next")
-            # FIXME: 用CVE编号判断而不是created time, opencve的时间不准 或者可以拿着CVE号去nvd查
+            # FIXME: 用CVE编号判断而不是created time, opencve的时间不准? 或者可以拿着CVE号去nvd查
             cve_list += [cve.get("cve_id") for cve in data.get("results", [])
-                         if compare_iso8601_with_validation(begin_time,cve.get("created_at"))]
+                         if compare_iso8601_with_validation(begin_time, cve.get("created_at"))]
         except ValueError as err:
             logger.error(
                 f"Failed to parse the response from OpenCVE due to the JSON error: {err}")
